@@ -5,6 +5,7 @@ use FindBin;
 use Cwd;
 
 package Tasks::Readme;
+
 use base 'Exporter';
 our @EXPORT = qw(compile_readme);
 
