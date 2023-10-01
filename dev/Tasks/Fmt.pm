@@ -12,8 +12,14 @@ our @EXPORT = qw(fmt);
 
 sub fmt {
     my $fmt_cmd = sub {
-        say $File::Find::dir;
+        if (   ( $File::Find::dir ne $File::Find::name )
+            && ( $File::Find::dir !~ /^local\// )
+            && ( index( $File::Find::dir, "/node_modules" ) == -1 )
+            && ( $_ =~ /\.(md|js|jsx|json|ts|tsx)$/ ) )
+        {
+            say $File::find::dir;
+            system( ( "deno", "fmt", $File::Find::name ) );
+        }
     };
-    say $FindBin::Bin;
-    File::Find::find( $fmt_cmd, ($FindBin::Bin) );
+    File::Find::find( $fmt_cmd, ( $FindBin::Bin . "/.." ) );
 }
