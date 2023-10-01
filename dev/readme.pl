@@ -2,10 +2,15 @@ use 5.28.0;
 use strict;
 use warnings;
 use FindBin;
+use Cwd;
 
-my $helptext = ``
+my $cwd = getcwd;
+my $file;
+open( $file, '>', "$cwd/../README.md" ) or die $!;
 
-  my $README = <<"README";
+my $helptext = system "$cwd/../corolla -h";
+
+my $README = <<"README";
 # corolla
 
 a lightweight sqlite web server.
@@ -27,4 +32,4 @@ carton install
 $helptext
 README
 
-say $README;
+print $file, $README;
