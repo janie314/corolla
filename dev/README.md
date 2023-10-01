@@ -17,13 +17,5 @@ carton install
 # usage
 
 ```
-Usage:
-    corolla [options] -db corolla.sqlite3
 
-Options:
-    -help   Helps you.
-
-    -man    The manual.
-
-    -db     Filepath to SQLite database. Default: ./corolla.sqlite3
 ```
