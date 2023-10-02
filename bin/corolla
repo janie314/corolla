@@ -2,7 +2,7 @@
 use strict;
 use warnings;
 use FindBin;
-use lib "$FindBin::Bin/local/lib/perl5";
+use lib "$FindBin::Bin/../local/lib/perl5";
 use DBI;
 use Cwd;
 use Getopt::Long;
