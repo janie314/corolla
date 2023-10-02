@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use FindBin;
 use lib "$FindBin::Bin/../local/lib/perl5";
+use lib "$FindBin::Bin/../lib";
+use Consts;
 use DBI;
 use Cwd;
 use Getopt::Long;
@@ -22,19 +24,26 @@ sub db {
 sub main {
 
     # CLI args
-    my $man    = 0;
-    my $help   = 0;
-    my $dbpath = getcwd . "/corolla.sqlite3";
+    my $dbpath  = getcwd . "/corolla.sqlite3";
+    my $help    = 0;
+    my $man     = 0;
+    my $version = 0;
     GetOptions(
         'db=s'   => \$dbpath,
         'help|?' => \$help,
-        'man'    => \$man
+        'man'    => \$man,
+        'V'      => \$version
     ) or pod2usage( -exitval => 1, -verbose => 1 );
     pod2usage( -exitval => 0, -verbose => 1 ) if $help;
     pod2usage( -exitval => 0, -verbose => 2 ) if $man;
 
-    # main execution
-    db $dbpath;
+    if ($version) {
+        say "corolla v" . Consts::VERSION;
+    }
+    else {
+        # main execution
+        db $dbpath;
+    }
 }
 
 main
