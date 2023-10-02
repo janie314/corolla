@@ -7,7 +7,7 @@ use DBI;
 use Cwd;
 use Getopt::Long;
 use Pod::Usage;
-use 5.28.0;
+use 5.38.0;
 
 sub server {
     my ( $port, $msg ) = @_;
