@@ -27,10 +27,12 @@ sub main {
     # CLI args
     my $dbpath  = getcwd . "/corolla.sqlite3";
     my $help    = 0;
+    my $port    = 50000;
     my $man     = 0;
     my $version = 0;
     GetOptions(
         'db=s'   => \$dbpath,
+        'port=i' => \$port,
         'help|?' => \$help,
         'man'    => \$man,
         'V'      => \$version
@@ -43,7 +45,7 @@ sub main {
     }
     else {
         # main execution
-        Server->new(8080)->run();
+        Server->new($port)->run();
 
         # db $dbpath;
     }

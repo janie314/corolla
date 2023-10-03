@@ -10,6 +10,8 @@ use base qw(HTTP::Server::Simple::CGI);
 
 my %dispatch = ();
 
+sub net_server { 'Net::Server'; }
+
 sub handle_request {
     my $self = shift;
     my $cgi  = shift;
