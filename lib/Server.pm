@@ -13,8 +13,7 @@ my %dispatch = ();
 sub net_server { 'Net::Server'; }
 
 sub handle_request {
-    my $self = shift;
-    my $cgi  = shift;
+    my ( $self, $cgi ) = @_;
 
     my $path    = $cgi->path_info();
     my $handler = $dispatch{$path};
