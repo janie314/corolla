@@ -4,6 +4,7 @@ use 5.38.0;
 use FindBin;
 use lib "$FindBin::Bin/../local/lib/perl5";
 use HTTP::Server::Simple::CGI;
+use HTTP::Response;
 
 package Server;
 use base qw(HTTP::Server::Simple::CGI);
@@ -18,17 +19,10 @@ sub handle_request {
     my $path    = $cgi->path_info();
     my $handler = $dispatch{$path};
 
-    if ( ref($handler) eq "CODE" ) {
-        print "HTTP/1.0 200 OK\r\n";
+    if (1) {
+        print HTTP::Response->new( 200, "joemoe" )->decoded_content;
         $handler->($cgi);
 
-    }
-    else {
-        print "HTTP/1.0 404 Not found\r\n";
-        print $cgi->header,
-          $cgi->start_html('Not found'),
-          $cgi->h1('Not found'),
-          $cgi->end_html;
     }
 }
 
