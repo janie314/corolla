@@ -5,6 +5,7 @@ use FindBin;
 use lib "$FindBin::Bin/../local/lib/perl5";
 use lib "$FindBin::Bin/../lib";
 use Consts;
+use Server;
 use DBI;
 use Cwd;
 use Getopt::Long;
@@ -42,7 +43,9 @@ sub main {
     }
     else {
         # main execution
-        db $dbpath;
+        Server->new(8080)->run();
+
+        # db $dbpath;
     }
 }
 

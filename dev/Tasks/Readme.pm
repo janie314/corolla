@@ -44,4 +44,4 @@ README
   print $file $README;
 }
 
-1
+1;

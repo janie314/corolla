@@ -22,3 +22,5 @@ sub fmt {
     };
     File::Find::find( $fmt_cmd, ( $FindBin::Bin . "/.." ) );
 }
+
+1

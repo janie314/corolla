@@ -10,3 +10,5 @@ our @EXPORT = qw(VERSION);
 sub VERSION {
     return "0.1.0";
 }
+
+1
