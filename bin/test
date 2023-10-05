@@ -1,0 +1,31 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use FindBin;
+use Data::Dumper;
+use 5.38.0;
+
+sub test {
+    my %h;
+    @h{ 1 .. 10 } = 11 .. 20;
+    say Dumper( \%h );
+}
+
+sub intersect {
+    my ( $_a, $_b ) = @_;
+    my @a = @{$_a};
+    my @b = @{$_b};
+    my %h;
+    my @res = ();
+    @h{@a} = @b;
+    foreach (@a) {
+        if ( exists $h{$_} ) {
+            push @b, $_;
+        }
+    }
+    say Dumper(@res);
+}
+
+my @a = ( 1, 2, 3 );
+my @b = ( 2, 3, 4 );
+say Dumper( intersect( \@a, \@b ) );
