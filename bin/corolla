@@ -12,10 +12,6 @@ use Getopt::Long;
 use Pod::Usage;
 use 5.38.0;
 
-sub server {
-    my ( $port, $msg ) = @_;
-}
-
 sub db {
     my ($dbfile) = @_;
     $dbfile =~ s~^:~./:~;
@@ -45,7 +41,7 @@ sub main {
     }
     else {
         # main execution
-        run_server;
+        run_server $port;
 
         # db $dbpath;
     }
