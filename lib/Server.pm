@@ -11,6 +11,6 @@ sub run_server {
         my ($c) = @_;
         $c->render( text => 'Hello World!' );
     };
-
+    app->secrets( ['I suppose this is important.'] );
     app->start( 'daemon', '-l', 'http://*:12345' );
 }
