@@ -26,9 +26,10 @@ sub run_server {
         my ($c) = @_;
         $c->render( text => 'Hello World!' );
     };
-    set $root . '/write' => sub {
-        my ($c) = @_;
-    };
+
+    # set $root . '/write' => sub {
+    #     my ($c) = @_;
+    # };
     app->secrets( ['I suppose this is important.'] );
 
     # database connection
