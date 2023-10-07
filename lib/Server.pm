@@ -10,8 +10,7 @@ use Future::Mutex;
 sub open_db_conn {
     my ($dbfile) = @_;
     $dbfile =~ s~^:~./:~;
-    my $db   = DBI->connect("dbi:SQLite:dbname=$dbfile") or die $DBI::errstr;
-    my $lock = Futur::Mutex->new;
+    my $db = DBI->connect("dbi:SQLite:dbname=$dbfile") or die $DBI::errstr;
 }
 
 sub run_server {
@@ -23,8 +22,10 @@ sub run_server {
 
     # set up endpoints
     get $root. '/read' => sub {
-        my ($c) = @_;
-        $c->render( text => 'Hello World!' );
+        my ($c)        = @_;
+        my $query_name = $c->param('query') || "";
+        my $args       = $c->param('args')  || "";
+        $c->render( text => "$query_name\n$args" );
     };
 
     # set $root . '/write' => sub {
