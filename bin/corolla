@@ -24,6 +24,7 @@ sub main {
     my $dbpath  = getcwd . "/corolla.sqlite3";
     my $help    = 0;
     my $port    = 50000;
+    my $root    = "/";
     my $man     = 0;
     my $version = 0;
     GetOptions(
@@ -31,6 +32,7 @@ sub main {
         'port=i' => \$port,
         'help|?' => \$help,
         'man'    => \$man,
+        'root=s' => \$root,
         'V'      => \$version
     ) or pod2usage( -exitval => 1, -verbose => 1 );
     pod2usage( -exitval => 0, -verbose => 1 ) if $help;
@@ -41,7 +43,7 @@ sub main {
     }
     else {
         # main execution
-        run_server $port;
+        run_server $port, $root;
 
         # db $dbpath;
     }
@@ -57,11 +59,15 @@ main
 
 =head1 SYNOPSIS
 
-corolla [options] -db corolla.sqlite3 
+corolla [options] corolla.sqlite3 
 
 =head1 OPTIONS
 
 =over 8
+
+=item B<-db>
+
+Filepath to SQLite database. Default: ./corolla.sqlite3
 
 =item B<-help>
 
@@ -71,9 +77,13 @@ Helps you.
 
 The manual.
 
-=item B<-db>
+=item B<-port>
 
-Filepath to SQLite database. Default: ./corolla.sqlite3
+The port the HTTP server will listen on.
+
+=item B<-root>
+
+The root from which HTTP API endpoints are served. Default: /
 
 =back
 
