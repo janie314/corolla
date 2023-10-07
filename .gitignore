@@ -1,2 +1,4 @@
 local
 dev/corolla.sqlite3
+bin/corolla.sqlite3
+corolla.sqlite3

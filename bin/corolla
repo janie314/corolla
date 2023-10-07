@@ -12,12 +12,6 @@ use Getopt::Long;
 use Pod::Usage;
 use 5.38.0;
 
-sub db {
-    my ($dbfile) = @_;
-    $dbfile =~ s~^:~./:~;
-    my $db = DBI->connect("dbi:SQLite:dbname=$dbfile") or die $DBI::errstr;
-}
-
 sub main {
 
     # CLI args
@@ -43,7 +37,7 @@ sub main {
     }
     else {
         # main execution
-        run_server $port, $root;
+        run_server $port, $root, $dbpath;
 
         # db $dbpath;
     }
