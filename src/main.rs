@@ -1,5 +1,6 @@
 use clap::Parser;
 
+mod db;
 mod endpoints;
 
 /// "your liteweight backend"
