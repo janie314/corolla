@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, State},
-    routing::get,
+    routing::post,
     Json, Router,
 };
 use std::sync::Arc;
@@ -12,7 +12,7 @@ struct ServerState {
 }
 
 #[axum::debug_handler]
-async fn get_vol(Path(num): Path<i64>, State(_state): State<ServerState>) -> Json<i64> {
+async fn sumbot(Path(num): Path<i64>, State(_state): State<ServerState>) -> Json<i64> {
     let vol = 30 + num;
     Json(vol)
 }
@@ -25,7 +25,9 @@ pub async fn serve(port: i64) {
         mu: Arc::new(RwLock::new(())),
     };
     println!("trying to listen on {}", &addr);
-    let app = Router::new().route("/vol", get(get_vol)).with_state(state);
+    let app = Router::new()
+        .route("/sumbot/:num", post(sumbot))
+        .with_state(state);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
