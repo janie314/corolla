@@ -1,11 +1,9 @@
-use std::sync::Arc;
-
 use axum::{
     extract::{Path, State},
-    routing::{get},
+    routing::get,
     Json, Router,
 };
-
+use std::sync::Arc;
 use tokio::sync::RwLock;
 
 #[derive(Clone)]
