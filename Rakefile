@@ -1,1 +1,1 @@
-require "peppermint/rake/ruby"
+require "peppermint/rake/rust"

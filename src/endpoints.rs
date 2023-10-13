@@ -5,8 +5,6 @@ use axum::{
     Json, Router,
 };
 
-
-
 #[axum::debug_handler]
 async fn sumbot(Path(num): Path<i64>, State(db): State<DB>) -> Json<i64> {
     let vol = 30 + num;
