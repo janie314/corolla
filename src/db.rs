@@ -28,9 +28,10 @@ impl DB {
         };
         Ok(db)
     }
-    pub async fn write_query(&self, _num: i64) -> Result<(), Error> {
+    pub async fn write_query(&self, num: i64) -> Result<(), Error> {
         let c = self.conn.write().await;
-        query("insert into t values (1);")
+        query("insert into t values (?);")
+            .bind(num)
             .execute(c.deref())
             .await?;
         Ok(())
