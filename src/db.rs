@@ -1,7 +1,6 @@
 use sqlx::{
     query,
-    sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions},
-    ConnectOptions, Connection, Error, Pool, Sqlite, SqliteConnection, SqlitePool,
+    sqlite::{SqliteConnectOptions, SqliteJournalMode}, Connection, Error, Pool, Sqlite, SqlitePool,
 };
 use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;

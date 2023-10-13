@@ -4,8 +4,8 @@ use axum::{
     routing::post,
     Json, Router,
 };
-use std::sync::Arc;
-use tokio::sync::RwLock;
+
+
 
 #[axum::debug_handler]
 async fn sumbot(Path(num): Path<i64>, State(db): State<DB>) -> Json<i64> {
