@@ -1,4 +1,8 @@
-use sqlx::{query, Connection, Error, Pool, Sqlite, SqlitePool};
+use sqlx::{
+    query,
+    sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions},
+    ConnectOptions, Connection, Error, Pool, Sqlite, SqliteConnection, SqlitePool,
+};
 use std::{ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
@@ -9,7 +13,16 @@ pub struct DB {
 
 impl DB {
     pub async fn new(filepath: &str) -> Result<Self, Error> {
-        let conn = SqlitePool::connect(&format!("sqlite::memory:{filepath}")).await?;
+        let conn = SqlitePool::connect_with(
+            SqliteConnectOptions::new()
+                .create_if_missing(true)
+                .filename(filepath)
+                .journal_mode(SqliteJournalMode::Wal),
+        )
+        .await?;
+        query("create table if not exists t (c int);")
+            .execute(&conn)
+            .await?;
         let db = DB {
             conn: Arc::new(RwLock::new(conn)),
         };

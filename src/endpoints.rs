@@ -8,16 +8,17 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 
 #[axum::debug_handler]
-async fn sumbot(Path(num): Path<i64>, State(state): State<DB>) -> Json<i64> {
+async fn sumbot(Path(num): Path<i64>, State(db): State<DB>) -> Json<i64> {
     let vol = 30 + num;
+    db.write_query(num).await.expect("bad");
     Json(vol)
 }
 
-pub async fn serve(port: i64) {
+pub async fn serve(filepath: &str, port: i64) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DB::new("/tmp/a/sqlite3").await.expect("oh no");
+    let conn = DB::new(filepath).await.expect("oh no");
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route("/sumbot/:num", post(sumbot))

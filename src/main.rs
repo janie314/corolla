@@ -8,6 +8,9 @@ mod endpoints;
 #[command(author, version, about, long_about = None)]
 struct Args {
     /// Choose a port to listen on
+    #[arg(short, long, default_value_t = String::from("corolla.sqlite3"))]
+    db: String,
+    /// Choose a port to listen on
     #[arg(short, long, default_value_t = 50000)]
     port: i64,
     /// Test mode?
@@ -21,6 +24,6 @@ async fn main() {
     if args.test {
         println!("testing, 123.")
     } else {
-        endpoints::serve(args.port).await;
+        endpoints::serve(&args.db, args.port).await;
     }
 }
