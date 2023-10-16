@@ -12,14 +12,14 @@ async fn sumbot(Path(num): Path<i64>, State(db): State<DB>) -> Json<i64> {
     Json(vol)
 }
 
-pub async fn serve(filepath: &str, port: i64) {
+pub async fn serve(route_base: &str, db_path: &str, port: i64) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DB::new(filepath).await.expect("oh no");
+    let conn = DB::new(db_path).await.expect("oh no");
     println!("trying to listen on {}", &addr);
     let app = Router::new()
-        .route("/sumbot/:num", post(sumbot))
+        .route(&format!("{route_base}/sumbot/:num"), post(sumbot))
         .with_state(conn);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
