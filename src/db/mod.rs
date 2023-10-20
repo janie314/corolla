@@ -1,10 +1,19 @@
+use axum::Json;
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Error, Pool, Sqlite, SqlitePool,
 };
-use std::{ops::Deref, sync::Arc};
+use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
+
+pub type QueryArgs = HashMap<String, String>;
+
+#[derive(Clone)]
+pub struct Query {
+    sql_template: String,
+    args: QueryArgs,
+}
 
 #[derive(Clone)]
 pub struct DB {
@@ -28,10 +37,10 @@ impl DB {
         };
         Ok(db)
     }
-    pub async fn write_query(&self, num: i64) -> Result<(), Error> {
+    pub async fn write_query(&self, query_name: &str, args: Json<QueryArgs>) -> Result<(), Error> {
         let c = self.conn.write().await;
         query("insert into t values (?);")
-            .bind(num)
+            .bind("wal")
             .execute(c.deref())
             .await?;
         Ok(())
