@@ -7,12 +7,10 @@ use sqlx::{
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
-pub type QueryArgs = HashMap<String, String>;
-
 #[derive(Clone)]
 pub struct Query {
     sql_template: String,
-    args: QueryArgs,
+    args: HashMap<String, String>,
 }
 
 #[derive(Clone)]
@@ -37,7 +35,11 @@ impl DB {
         };
         Ok(db)
     }
-    pub async fn write_query(&self, _query_name: &str, _args: Json<QueryArgs>) -> Result<(), Error> {
+    pub async fn write_query(
+        &self,
+        _query_name: &str,
+        _args: &HashMap<String, String>,
+    ) -> Result<(), Error> {
         let c = self.conn.write().await;
         query("insert into t values (?);")
             .bind("wal")
