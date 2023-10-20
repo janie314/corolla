@@ -37,7 +37,7 @@ impl DB {
         };
         Ok(db)
     }
-    pub async fn write_query(&self, query_name: &str, args: Json<QueryArgs>) -> Result<(), Error> {
+    pub async fn write_query(&self, _query_name: &str, _args: Json<QueryArgs>) -> Result<(), Error> {
         let c = self.conn.write().await;
         query("insert into t values (?);")
             .bind("wal")

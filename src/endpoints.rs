@@ -1,7 +1,7 @@
 use crate::db::DB;
 use axum::{
     extract::{Path, Query, State},
-    routing::{get, post},
+    routing::{get},
     Json, Router,
 };
 use std::collections::HashMap;
@@ -16,9 +16,9 @@ pub type Arg = HashMap<String, String>;
 
 #[axum::debug_handler]
 async fn read_query(
-    Path(query_name): Path<String>,
+    Path(_query_name): Path<String>,
     Query(params): Query<HashMap<String, String>>,
-    State(db): State<DB>,
+    State(_db): State<DB>,
 ) -> Json<String> {
     let x = params.get("joe").unwrap_or(&String::default()).clone();
     Json(x)
