@@ -49,14 +49,14 @@ impl DB {
         queries.insert(
             "q1".to_string(),
             Query {
-                sql_template: "insert into t values (?);".to_string(),
+                sql_template: "select c from t where c != (?);".to_string(),
                 args: Vec::from(["val".to_string()]),
             },
         );
         let db = DB { conn, queries };
         Ok(db)
     }
-    pub async fn write_query(
+    pub async fn read_query(
         &self,
         query_name: &str,
         args: &HashMap<String, String>,

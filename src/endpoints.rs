@@ -9,13 +9,13 @@ use std::collections::HashMap;
 pub type Arg = HashMap<String, String>;
 
 #[axum::debug_handler]
-async fn read_query(
-    Path(_query_name): Path<String>,
+async fn read_query_endpoint(
+    Path(query_name): Path<String>,
     Query(params): Query<HashMap<String, String>>,
-    State(_db): State<DB>,
+    State(db): State<DB>,
 ) -> Json<String> {
-    let x = params.get("joe").unwrap_or(&String::default()).clone();
-    Json(x)
+    db.read_query(&query_name, &params);
+    Json("".to_string())
 }
 
 pub async fn serve(route_base: &str, db_path: &str, port: i64) {
@@ -25,7 +25,10 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
     let conn = DB::new(db_path).await.expect("oh no");
     println!("trying to listen on {}", &addr);
     let app = Router::new()
-        .route(&format!("{route_base}/read/:query_name"), get(read_query))
+        .route(
+            &format!("{route_base}/read/:query_name"),
+            get(read_query_endpoint),
+        )
         .with_state(conn);
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
