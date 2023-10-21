@@ -1,17 +1,11 @@
 use crate::db::DB;
 use axum::{
     extract::{Path, Query, State},
-    routing::{get},
+    routing::get,
     Json, Router,
 };
 use std::collections::HashMap;
 
-/*
-
-WAIT YOU DON'T NEED ANY OF THIS GET/JSON NONSENSE
-JUST USE THE QUERY ARGS IN YOUR GET QUERY PARAMETER
-
-*/
 pub type Arg = HashMap<String, String>;
 
 #[axum::debug_handler]
