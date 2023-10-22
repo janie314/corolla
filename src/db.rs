@@ -1,3 +1,4 @@
+use crate::error::Error;
 use axum::{http::StatusCode, response::IntoResponse, Json};
 use sqlx::{
     query,
@@ -7,25 +8,6 @@ use sqlx::{
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
-#[derive(Debug)]
-pub enum Error {
-    SQL(sqlx::Error),
-    QueryDoesNotExist,
-    WrongNumberOfArgs,
-}
-
-impl From<sqlx::Error> for Error {
-    fn from(e: sqlx::Error) -> Self {
-        Error::SQL(e)
-    }
-}
-
-impl IntoResponse for Error {
-    fn into_response(self) -> axum::response::Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, "what was the problem").into_response()
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct Query {
     sql_template: String,
@@ -33,12 +15,12 @@ pub struct Query {
 }
 
 #[derive(Clone)]
-pub struct DB {
+pub struct DBQuery {
     conn: Arc<RwLock<Pool<Sqlite>>>,
     queries: HashMap<String, Query>,
 }
 
-impl DB {
+impl DBQuery {
     pub async fn new(
         filepath: &str,
         init_statements: &[&str],
@@ -65,7 +47,7 @@ impl DB {
                 },
             );
         }
-        let db = DB {
+        let db = DBQuery {
             conn,
             queries: queries_aux,
         };

@@ -1,20 +1,19 @@
-use crate::db::DB;
+use crate::db::DBQuery;
 use axum::{
     extract::{Path, Query, State},
-    http::{header, StatusCode},
     response::IntoResponse,
     routing::get,
-    Json, Router,
+    Router,
 };
 use std::collections::HashMap;
 
-pub type Arg = HashMap<String, String>;
+pub type Args = HashMap<String, String>;
 
 #[axum::debug_handler]
 async fn read_query_endpoint(
     Path(query_name): Path<String>,
-    Query(params): Query<HashMap<String, String>>,
-    State(db): State<DB>,
+    Query(params): Query<Args>,
+    State(db): State<DBQuery>,
 ) -> impl IntoResponse {
     db.read_query(&query_name, &params).await
 }
@@ -23,7 +22,7 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DB::new(
+    let conn = DBQuery::new(
         db_path,
         &["create table if not exists t (c text);"],
         &[(

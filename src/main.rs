@@ -2,6 +2,7 @@ use clap::Parser;
 
 mod db;
 mod endpoints;
+mod error;
 
 /// "your liteweight backend"
 #[derive(Parser, Debug)]
