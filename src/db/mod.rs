@@ -75,25 +75,20 @@ impl DB {
             .ok_or_else(|| Error::QueryDoesNotExist)?;
         if args.keys().len() == query.args.len() {
             let conn = self.conn.read().await;
-            match self.queries.get(query_name) {
-                Some(req_query) => {
-                    let mut q = sqlx::query(&req_query.sql_template);
-                    match args.get("val") {
-                        Some(val) => {
-                            println!("a");
-                            q = q.bind(val);
-                        }
-                        None => {
-                            println!("b");
-                            q = q.bind("");
-                        }
+            let mut statement = sqlx::query(&query.sql_template);
+            for arg in query.args.iter() {
+                match args.get(arg) {
+                    Some(val) => {
+                        statement = statement.bind(val);
                     }
-                    let res = q.fetch_one(conn.deref()).await?;
-                    println!("{:?}", res.try_get::<String, usize>(0).unwrap_or_default());
-                    Ok(())
+                    None => {
+                        statement = statement.bind("");
+                    }
                 }
-                None => Err(Error::QueryDoesNotExist),
             }
+            let res = statement.fetch_one(conn.deref()).await?;
+            println!("{:?}", res.try_get::<String, usize>(0).unwrap_or_default());
+            Ok(())
         } else {
             Err(Error::WrongNumberOfArgs)
         }
