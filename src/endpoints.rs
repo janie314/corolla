@@ -1,6 +1,8 @@
 use crate::db::DB;
 use axum::{
     extract::{Path, Query, State},
+    http::{header, StatusCode},
+    response::IntoResponse,
     routing::get,
     Json, Router,
 };
@@ -13,11 +15,8 @@ async fn read_query_endpoint(
     Path(query_name): Path<String>,
     Query(params): Query<HashMap<String, String>>,
     State(db): State<DB>,
-) -> Json<String> {
-    match db.read_query(&query_name, &params).await {
-        Ok(_) => Json("good".to_string()),
-        Err(_) => Json("bad".to_string()),
-    }
+) -> impl IntoResponse {
+    db.read_query(&query_name, &params).await
 }
 
 pub async fn serve(route_base: &str, db_path: &str, port: i64) {

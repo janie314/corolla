@@ -1,3 +1,4 @@
+use axum::{http::StatusCode, response::IntoResponse, Json};
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
@@ -16,6 +17,12 @@ pub enum Error {
 impl From<sqlx::Error> for Error {
     fn from(e: sqlx::Error) -> Self {
         Error::SQL(e)
+    }
+}
+
+impl IntoResponse for Error {
+    fn into_response(self) -> axum::response::Response {
+        (StatusCode::INTERNAL_SERVER_ERROR, "what was the problem").into_response()
     }
 }
 
@@ -68,7 +75,7 @@ impl DB {
         &self,
         query_name: &str,
         args: &HashMap<String, String>,
-    ) -> Result<(), Error> {
+    ) -> Result<Json<Vec<String>>, Error> {
         let query = self
             .queries
             .get(query_name)
@@ -86,9 +93,12 @@ impl DB {
                     }
                 }
             }
-            let res = statement.fetch_one(conn.deref()).await?;
-            println!("{:?}", res.try_get::<String, usize>(0).unwrap_or_default());
-            Ok(())
+            let sql_res = statement.fetch_one(conn.deref()).await?;
+            let mut res = Vec::<String>::new();
+            for c in 0..(sql_res.columns().len()) {
+                res.push(sql_res.try_get::<String, usize>(c).unwrap_or_default());
+            }
+            Ok(Json(res))
         } else {
             Err(Error::WrongNumberOfArgs)
         }
