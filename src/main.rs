@@ -37,6 +37,7 @@ async fn main() {
                 Vec::from(["val".to_string()]),
             )],
         )
-        .await;
+        .await
+        .expect("the server stopped");
     }
 }

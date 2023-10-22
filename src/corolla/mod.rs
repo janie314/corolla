@@ -7,6 +7,8 @@ use axum::{
 };
 use std::collections::HashMap;
 
+use self::error::Error;
+
 mod db;
 mod error;
 
@@ -36,13 +38,11 @@ pub async fn serve(
     port: i64,
     init_statements: &[&str],
     queries: &[(&str, &str, Vec<String>)],
-) {
+) -> Result<(), Error> {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
-        .expect("i could not listen on the port");
-    let conn = DB::new(db_path, init_statements, queries)
-        .await
-        .expect("oh no");
+        .map_err(|_| Error::BadPort)?;
+    let conn = DB::new(db_path, init_statements, queries).await?;
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(
@@ -57,5 +57,6 @@ pub async fn serve(
     axum::Server::bind(&addr)
         .serve(app.into_make_service())
         .await
-        .expect("the server crashed");
+        .map_err(|_| Error::Server)?;
+    Ok(())
 }

@@ -3,6 +3,8 @@ use axum::{http::StatusCode, response::IntoResponse};
 /// An error type for a SQLite DB. Wraps several types of errors and implements axum_core::response::into_response::IntoResponse.
 #[derive(Debug)]
 pub enum Error {
+    BadPort,
+    Server,
     SQL(sqlx::Error),
     QueryDoesNotExist,
     WrongNumberOfArgs,

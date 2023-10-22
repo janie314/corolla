@@ -1,3 +1,4 @@
+use super::error::Error;
 use axum::Json;
 use sqlx::{
     query,
@@ -6,8 +7,6 @@ use sqlx::{
 };
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
-
-use super::error::Error;
 
 #[derive(Debug, Clone)]
 struct Query {
