@@ -60,6 +60,12 @@ impl DB {
         };
         Ok(db)
     }
+    /// Executes a read-only query on the SQLite database and returns the result.
+    ///
+    /// # Arguments
+    ///
+    /// * `query_name` - The code name of the query in the query lookup table.
+    /// * `args` - Arguments to be bound to the query.
     pub async fn read_query(
         &self,
         query_name: &str,
