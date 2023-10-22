@@ -14,8 +14,10 @@ async fn read_query_endpoint(
     Query(params): Query<HashMap<String, String>>,
     State(db): State<DB>,
 ) -> Json<String> {
-    db.read_query(&query_name, &params);
-    Json("".to_string())
+    match db.read_query(&query_name, &params).await {
+        Ok(_) => Json("good".to_string()),
+        Err(_) => Json("bad".to_string()),
+    }
 }
 
 pub async fn serve(route_base: &str, db_path: &str, port: i64) {

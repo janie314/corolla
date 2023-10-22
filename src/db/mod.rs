@@ -2,7 +2,7 @@ use axum::Json;
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
-    Pool, Sqlite, SqlitePool,
+    Pool, Row, Sqlite, SqlitePool,
 };
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
@@ -41,7 +41,7 @@ impl DB {
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
-        query("create table if not exists t (c int);")
+        query("create table if not exists t (c text);")
             .execute(&conn)
             .await?;
         let conn = Arc::new(RwLock::new(conn));
@@ -70,8 +70,18 @@ impl DB {
             match self.queries.get(query_name) {
                 Some(req_query) => {
                     let mut q = sqlx::query(&req_query.sql_template);
-                    q = q.bind("wal");
-                    q.execute(conn.deref()).await?;
+                    match args.get("val") {
+                        Some(val) => {
+                            println!("a");
+                            q = q.bind(val);
+                        }
+                        None => {
+                            println!("b");
+                            q = q.bind("");
+                        }
+                    }
+                    let res = q.fetch_one(conn.deref()).await?;
+                    println!("{:?}", res.try_get::<String, usize>(0).unwrap_or_default());
                     Ok(())
                 }
                 None => Err(Error::QueryDoesNotExist),
