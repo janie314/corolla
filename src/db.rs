@@ -1,5 +1,5 @@
 use crate::error::Error;
-use axum::{http::StatusCode, response::IntoResponse, Json};
+use axum::{Json};
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
