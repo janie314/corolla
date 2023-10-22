@@ -32,7 +32,11 @@ pub struct DB {
 }
 
 impl DB {
-    pub async fn new(filepath: &str, init_statements: &[&str]) -> Result<Self, Error> {
+    pub async fn new(
+        filepath: &str,
+        init_statements: &[&str],
+        queries: &[(&str, &str, Vec<String>)],
+    ) -> Result<Self, Error> {
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
                 .create_if_missing(true)
@@ -44,15 +48,20 @@ impl DB {
             query(s).execute(&conn).await?;
         }
         let conn = Arc::new(RwLock::new(conn));
-        let mut queries: HashMap<String, Query> = HashMap::new();
-        queries.insert(
-            "q1".to_string(),
-            Query {
-                sql_template: "select c from t where c != (?);".to_string(),
-                args: Vec::from(["val".to_string()]),
-            },
-        );
-        let db = DB { conn, queries };
+        let mut queries_aux: HashMap<String, Query> = HashMap::new();
+        for (name, statement, args) in queries {
+            queries_aux.insert(
+                name.to_string(),
+                Query {
+                    sql_template: statement.to_string(),
+                    args: args.to_vec(),
+                },
+            );
+        }
+        let db = DB {
+            conn,
+            queries: queries_aux,
+        };
         Ok(db)
     }
     pub async fn read_query(
@@ -65,7 +74,7 @@ impl DB {
             .get(query_name)
             .ok_or_else(|| Error::QueryDoesNotExist)?;
         if args.keys().len() == query.args.len() {
-            let conn = self.conn.write().await;
+            let conn = self.conn.read().await;
             match self.queries.get(query_name) {
                 Some(req_query) => {
                     let mut q = sqlx::query(&req_query.sql_template);

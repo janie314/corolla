@@ -24,9 +24,17 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DB::new(db_path, &["create table if not exists t (c text);"])
-        .await
-        .expect("oh no");
+    let conn = DB::new(
+        db_path,
+        &["create table if not exists t (c text);"],
+        &[(
+            "q1",
+            "select c from t where c = ?;",
+            Vec::from(["val".to_string()]),
+        )],
+    )
+    .await
+    .expect("oh no");
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(
