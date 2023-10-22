@@ -32,7 +32,7 @@ pub struct DB {
 }
 
 impl DB {
-    pub async fn new(filepath: &str) -> Result<Self, Error> {
+    pub async fn new(filepath: &str, init_statements: &[&str]) -> Result<Self, Error> {
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
                 .create_if_missing(true)
@@ -40,9 +40,9 @@ impl DB {
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
-        query("create table if not exists t (c text);")
-            .execute(&conn)
-            .await?;
+        for s in init_statements {
+            query(s).execute(&conn).await?;
+        }
         let conn = Arc::new(RwLock::new(conn));
         let mut queries: HashMap<String, Query> = HashMap::new();
         queries.insert(
