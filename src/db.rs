@@ -70,7 +70,7 @@ impl DB {
         &self,
         query_name: &str,
         args: &HashMap<String, String>,
-    ) -> Result<Json<Vec<String>>, Error> {
+    ) -> Result<Json<Vec<Vec<String>>>, Error> {
         let query = self
             .queries
             .get(query_name)
@@ -88,10 +88,14 @@ impl DB {
                     }
                 }
             }
-            let sql_res = statement.fetch_one(conn.deref()).await?;
-            let mut res = Vec::<String>::new();
-            for c in 0..(sql_res.columns().len()) {
-                res.push(sql_res.try_get::<String, usize>(c).unwrap_or_default());
+            let sql_res = statement.fetch_all(conn.deref()).await?;
+            let mut res = Vec::<Vec<String>>::new();
+            for row in sql_res {
+                let mut v = Vec::<String>::new();
+                for c in 0..(row.len()) {
+                    v.push(row.try_get::<String, usize>(c).unwrap_or_default());
+                }
+                res.push(v);
             }
             Ok(Json(res))
         } else {

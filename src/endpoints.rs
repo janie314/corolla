@@ -27,7 +27,7 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
         &["create table if not exists t (c text);"],
         &[(
             "q1",
-            "select c from t where c = ?;",
+            "select c from t where c != ?;",
             Vec::from(["val".to_string()]),
         )],
     )
