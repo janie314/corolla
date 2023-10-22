@@ -21,6 +21,13 @@ pub struct DB {
 }
 
 impl DB {
+    /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
+    ///
+    /// # Arguments
+    ///
+    /// * `filepath` - Filepath to the SQLite database.
+    /// * `init_statements` - A list of SQL statements that will be executed to initialize the datbase, in order.
+    /// * `queries` - A lookup table of SQL queries.
     pub async fn new(
         filepath: &str,
         init_statements: &[&str],
