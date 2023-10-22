@@ -1,4 +1,4 @@
-use crate::db::DB;
+use crate::corolla::db::DB;
 use axum::{
     extract::{Path, Query, State},
     response::IntoResponse,
@@ -6,6 +6,9 @@ use axum::{
     Router,
 };
 use std::collections::HashMap;
+
+mod db;
+mod error;
 
 pub type Args = HashMap<String, String>;
 
@@ -27,21 +30,19 @@ async fn write_query_endpoint(
     db.write_query(&query_name, &params).await
 }
 
-pub async fn serve(route_base: &str, db_path: &str, port: i64) {
+pub async fn serve(
+    route_base: &str,
+    db_path: &str,
+    port: i64,
+    init_statements: &[&str],
+    queries: &[(&str, &str, Vec<String>)],
+) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DB::new(
-        db_path,
-        &["create table if not exists t (c text);"],
-        &[(
-            "q1",
-            "select c from t where c != ?;",
-            Vec::from(["val".to_string()]),
-        )],
-    )
-    .await
-    .expect("oh no");
+    let conn = DB::new(db_path, init_statements, queries)
+        .await
+        .expect("oh no");
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(

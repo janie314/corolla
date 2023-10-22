@@ -1,8 +1,6 @@
 use clap::Parser;
 
-mod db;
-mod endpoints;
-mod error;
+mod corolla;
 
 /// "your liteweight backend"
 #[derive(Parser, Debug)]
@@ -28,6 +26,17 @@ async fn main() {
     if args.test {
         println!("testing, 123.")
     } else {
-        endpoints::serve(&args.route, &args.db, args.port).await;
+        corolla::serve(
+            &args.route,
+            &args.db,
+            args.port,
+            &["create table if not exists t (c text);"],
+            &[(
+                "q1",
+                "select c from t where c != ?;",
+                Vec::from(["val".to_string()]),
+            )],
+        )
+        .await;
     }
 }
