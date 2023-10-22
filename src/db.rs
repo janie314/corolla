@@ -1,5 +1,5 @@
 use crate::error::Error;
-use axum::{Json};
+use axum::Json;
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
@@ -9,18 +9,18 @@ use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
 #[derive(Debug, Clone)]
-pub struct Query {
+struct Query {
     sql_template: String,
     args: Vec<String>,
 }
 
 #[derive(Clone)]
-pub struct DBQuery {
+pub struct DB {
     conn: Arc<RwLock<Pool<Sqlite>>>,
     queries: HashMap<String, Query>,
 }
 
-impl DBQuery {
+impl DB {
     pub async fn new(
         filepath: &str,
         init_statements: &[&str],
@@ -47,7 +47,7 @@ impl DBQuery {
                 },
             );
         }
-        let db = DBQuery {
+        let db = DB {
             conn,
             queries: queries_aux,
         };

@@ -1,4 +1,4 @@
-use crate::db::DBQuery;
+use crate::db::DB;
 use axum::{
     extract::{Path, Query, State},
     response::IntoResponse,
@@ -13,7 +13,7 @@ pub type Args = HashMap<String, String>;
 async fn read_query_endpoint(
     Path(query_name): Path<String>,
     Query(params): Query<Args>,
-    State(db): State<DBQuery>,
+    State(db): State<DB>,
 ) -> impl IntoResponse {
     db.read_query(&query_name, &params).await
 }
@@ -22,7 +22,7 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .expect("i could not listen on the port");
-    let conn = DBQuery::new(
+    let conn = DB::new(
         db_path,
         &["create table if not exists t (c text);"],
         &[(
