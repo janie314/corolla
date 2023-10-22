@@ -1,4 +1,3 @@
-use axum::Json;
 use sqlx::{
     query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
