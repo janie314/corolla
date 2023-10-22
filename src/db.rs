@@ -102,4 +102,38 @@ impl DB {
             Err(Error::WrongNumberOfArgs)
         }
     }
+    /// Executes a write-only query on the SQLite database and returns the result.
+    ///
+    /// # Arguments
+    ///
+    /// * `query_name` - The code name of the query in the query lookup table.
+    /// * `args` - Arguments to be bound to the query.
+    pub async fn write_query(
+        &self,
+        query_name: &str,
+        args: &HashMap<String, String>,
+    ) -> Result<(), Error> {
+        let query = self
+            .queries
+            .get(query_name)
+            .ok_or_else(|| Error::QueryDoesNotExist)?;
+        if args.keys().len() == query.args.len() {
+            let conn = self.conn.read().await;
+            let mut statement = sqlx::query(&query.sql_template);
+            for arg in query.args.iter() {
+                match args.get(arg) {
+                    Some(val) => {
+                        statement = statement.bind(val);
+                    }
+                    None => {
+                        statement = statement.bind("");
+                    }
+                }
+            }
+            statement.execute(conn.deref()).await?;
+            Ok(())
+        } else {
+            Err(Error::WrongNumberOfArgs)
+        }
+    }
 }

@@ -2,7 +2,7 @@ use crate::db::DB;
 use axum::{
     extract::{Path, Query, State},
     response::IntoResponse,
-    routing::get,
+    routing::{get, post},
     Router,
 };
 use std::collections::HashMap;
@@ -16,6 +16,15 @@ async fn read_query_endpoint(
     State(db): State<DB>,
 ) -> impl IntoResponse {
     db.read_query(&query_name, &params).await
+}
+
+#[axum::debug_handler]
+async fn write_query_endpoint(
+    Path(query_name): Path<String>,
+    Query(params): Query<Args>,
+    State(db): State<DB>,
+) -> impl IntoResponse {
+    db.write_query(&query_name, &params).await
 }
 
 pub async fn serve(route_base: &str, db_path: &str, port: i64) {
@@ -38,6 +47,10 @@ pub async fn serve(route_base: &str, db_path: &str, port: i64) {
         .route(
             &format!("{route_base}/read/:query_name"),
             get(read_query_endpoint),
+        )
+        .route(
+            &format!("{route_base}/write/:query_name"),
+            post(write_query_endpoint),
         )
         .with_state(conn);
     axum::Server::bind(&addr)
