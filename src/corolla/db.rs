@@ -96,6 +96,7 @@ impl DB {
             }
             let sql_res = statement.fetch_all(conn.deref()).await?;
             let mut res = Vec::<Vec<String>>::new();
+            res.push(query.args.clone());
             for row in sql_res {
                 let mut v = Vec::<String>::new();
                 for c in 0..(row.len()) {
