@@ -16,22 +16,30 @@ pub type Args = HashMap<String, String>;
 
 #[axum::debug_handler]
 async fn read_query_endpoint(
-    Path(query_name): Path<String>,
+    Path(query): Path<String>,
     Query(params): Query<Args>,
     State(db): State<DB>,
 ) -> impl IntoResponse {
-    db.read_query(&query_name, &params).await
+    db.read_query(&query, &params).await
 }
 
 #[axum::debug_handler]
 async fn write_query_endpoint(
-    Path(query_name): Path<String>,
+    Path(query): Path<String>,
     State(db): State<DB>,
     Json(params): Json<Args>,
 ) -> impl IntoResponse {
-    db.write_query(&query_name, &params).await
+    db.write_query(&query, &params).await
 }
-
+/// Runs the Corolla server.
+///
+/// # Arguments
+///
+/// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
+/// * `db_path` - Filepath to the SQLite database.
+/// * `port` - The port the server will listen on.
+/// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
+/// * `queries` - A lookup table of SQL queries.
 pub async fn serve(
     route_base: &str,
     db_path: &str,
@@ -46,11 +54,11 @@ pub async fn serve(
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(
-            &format!("{route_base}/read/:query_name"),
+            &format!("{route_base}/read/:query"),
             get(read_query_endpoint),
         )
         .route(
-            &format!("{route_base}/write/:query_name"),
+            &format!("{route_base}/write/:query"),
             post(write_query_endpoint),
         )
         .with_state(conn);

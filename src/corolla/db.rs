@@ -8,15 +8,21 @@ use sqlx::{
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
 
+/// Represents a database query.
 #[derive(Debug, Clone)]
 struct Query {
+    /// [A SQLite statement with parameters.](https://www.sqlite.org/c3ref/bind_blob.html) Only `?` parameters are tested.
     sql_template: String,
+    /// The query's list of parameter names, in order.
     args: Vec<String>,
 }
 
+/// Represents a connection to a SQLite database.
 #[derive(Clone)]
 pub struct DB {
+    /// A read/write lock on top of a SQLite connection pool.
     conn: Arc<RwLock<Pool<Sqlite>>>,
+    /// A lookup table of DB queries.
     queries: HashMap<String, Query>,
 }
 
@@ -26,7 +32,7 @@ impl DB {
     /// # Arguments
     ///
     /// * `filepath` - Filepath to the SQLite database.
-    /// * `init_statements` - A list of SQL statements that will be executed to initialize the datbase, in order.
+    /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
     /// * `queries` - A lookup table of SQL queries.
     pub async fn new(
         filepath: &str,
