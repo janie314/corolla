@@ -1,6 +1,5 @@
 use crate::corolla::db::DB;
 use axum::{
-    body::Body,
     extract::{Path, Query, State},
     response::IntoResponse,
     routing::{get, post},
