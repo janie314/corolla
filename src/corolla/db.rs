@@ -118,7 +118,7 @@ impl DB {
             .get(query_name)
             .ok_or_else(|| Error::QueryDoesNotExist)?;
         if args.keys().len() == query.args.len() {
-            let conn = self.conn.read().await;
+            let conn = self.conn.write().await;
             let mut statement = sqlx::query(&query.sql_template);
             for arg in query.args.iter() {
                 match args.get(arg) {

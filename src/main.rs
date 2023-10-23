@@ -31,11 +31,18 @@ async fn main() {
             &args.db,
             args.port,
             &["create table if not exists t (c text);"],
-            &[(
-                "q1",
-                "select c from t where c != ?;",
-                Vec::from(["val".to_string()]),
-            )],
+            &[
+                (
+                    "q1",
+                    "select c from t where c != ?;",
+                    Vec::from(["val".to_string()]),
+                ),
+                (
+                    "q2",
+                    "insert into t values (?);",
+                    Vec::from(["val".to_string()]),
+                ),
+            ],
         )
         .await
         .expect("the server stopped");
