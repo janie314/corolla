@@ -11,6 +11,7 @@ use self::error::Error;
 
 mod db;
 mod error;
+mod spec;
 
 pub type Args = HashMap<String, String>;
 
