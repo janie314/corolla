@@ -4,10 +4,24 @@ use axum::{http::StatusCode, response::IntoResponse};
 #[derive(Debug)]
 pub enum Error {
     BadPort,
+    File(std::io::Error),
+    JSON(serde_json::Error),
     Server,
     SQL(sqlx::Error),
     QueryDoesNotExist,
     WrongNumberOfArgs,
+}
+
+impl From<std::io::Error> for Error {
+    fn from(e: std::io::Error) -> Self {
+        Error::File(e)
+    }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(e: serde_json::Error) -> Self {
+        Error::JSON(e)
+    }
 }
 
 impl From<sqlx::Error> for Error {
