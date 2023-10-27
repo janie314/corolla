@@ -1,21 +1,14 @@
-use super::error::Error;
+use super::{
+    error::Error,
+    spec::{Query, Spec},
+};
 use axum::Json;
 use sqlx::{
-    query,
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
 };
 use std::{collections::HashMap, ops::Deref, sync::Arc};
 use tokio::sync::RwLock;
-
-/// Represents a database query.
-#[derive(Debug, Clone)]
-struct Query {
-    /// [A SQLite statement with parameters.](https://www.sqlite.org/c3ref/bind_blob.html) Only `?` parameters are tested.
-    sql_template: String,
-    /// The query's list of parameter names, in order.
-    args: Vec<String>,
-}
 
 /// Represents a connection to a SQLite database.
 #[derive(Clone)]
@@ -27,6 +20,35 @@ pub struct DB {
 }
 
 impl DB {
+    /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
+    ///
+    /// # Arguments
+    ///
+    /// * `filepath` - Filepath to the SQLite database.
+    /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
+    /// * `queries` - A lookup table of SQL queries.
+    pub async fn from_spec(filepath: &str, spec: &Spec) -> Result<Self, Error> {
+        let conn = SqlitePool::connect_with(
+            SqliteConnectOptions::new()
+                .create_if_missing(true)
+                .filename(filepath)
+                .journal_mode(SqliteJournalMode::Wal),
+        )
+        .await?;
+        for s in &spec.init {
+            sqlx::query(&s).execute(&conn).await?;
+        }
+        let conn = Arc::new(RwLock::new(conn));
+        let queries_aux = spec.queries.clone();
+        /*
+         * run conversions
+         */
+        for conversion in spec.conversions {}
+        Ok(DB {
+            conn,
+            queries: queries_aux,
+        })
+    }
     /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
     ///
     /// # Arguments
@@ -47,7 +69,7 @@ impl DB {
         )
         .await?;
         for s in init_statements {
-            query(s).execute(&conn).await?;
+            sqlx::query(s).execute(&conn).await?;
         }
         let conn = Arc::new(RwLock::new(conn));
         let mut queries_aux: HashMap<String, Query> = HashMap::new();
@@ -142,5 +164,16 @@ impl DB {
         } else {
             Err(Error::WrongNumberOfArgs)
         }
+    }
+    /// Execute a SQL statement that modifies the database
+    ///
+    /// # Arguments
+    ///
+    /// * `sql` - SQL statement to execute
+    /// TODO: This needs to take a vector of SQL statements
+    pub async fn write_raw_query(&self, sql: &str) -> Result<(), Error> {
+        let conn = self.conn.write().await;
+        sqlx::query(&sql).execute(conn.deref()).await?;
+        Ok(())
     }
 }
