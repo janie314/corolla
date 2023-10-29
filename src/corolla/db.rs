@@ -75,7 +75,7 @@ impl DB {
             conn,
             queries: queries.clone(),
         };
-        &self.init_db_info();
+        let _ = &self.init_db_info();
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
