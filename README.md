@@ -17,13 +17,14 @@ carton install
 # usage
 
 ```
-Usage:
-    corolla [options] -db corolla.sqlite3
+Usage: corolla [OPTIONS]
 
 Options:
-    -help   Helps you.
-
-    -man    The manual.
-
-    -db     Filepath to SQLite database. Default: ./corolla.sqlite3
+  -d, --db <DB>        Filepath to the SQLite database [default: corolla.sqlite3]
+  -p, --port <PORT>    Choose a port to listen on [default: 50000]
+  -r, --route <ROUTE>  Base URL for API endpoints [default: ]
+  -s, --spec <SPEC>    Filepath to the spec.json file [default: spec.json]
+  -t, --test           Test mode?
+  -h, --help           Print help
+  -V, --version        Print version
 ```
