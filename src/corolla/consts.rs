@@ -1,1 +1,1 @@
-const SPEC_VERSION: Version = vec![[1, 0, 0]];
+pub const SPEC_VERSION: [u64; 3] = [1, 0, 0];

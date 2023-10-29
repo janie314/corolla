@@ -2,7 +2,7 @@ use super::error::Error;
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap, fs};
 
-type Version = Vec<u64>;
+pub type Version = Vec<u64>;
 
 /// Compares two `Version` values.
 ///

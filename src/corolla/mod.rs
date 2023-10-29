@@ -1,4 +1,7 @@
-use self::{error::Error, spec::read_spec};
+use self::{
+    error::Error,
+    spec::{read_spec, Spec},
+};
 use crate::corolla::db::DB;
 use axum::{
     extract::{Path, Query, State},
@@ -8,6 +11,7 @@ use axum::{
 };
 use std::collections::HashMap;
 
+mod consts;
 mod db;
 mod error;
 mod spec;
@@ -40,17 +44,11 @@ async fn write_query_endpoint(
 /// * `port` - The port the server will listen on.
 /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
 /// * `queries` - A lookup table of SQL queries.
-async fn serve(
-    route_base: &str,
-    port: i64,
-    db_path: &str,
-    init_statements: &Vec<String>,
-    queries: &HashMap<String, spec::Query>,
-) -> Result<(), Error> {
+async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Result<(), Error> {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
         .map_err(|_| Error::BadPort)?;
-    let conn = DB::new(db_path, init_statements, queries).await?;
+    let conn = DB::from_spec(db_path, &spec).await?;
     println!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(
@@ -78,6 +76,6 @@ async fn serve(
 /// * `spec_path` - Filepath to the spec.json.
 pub async fn run(route_base: &str, port: i64, db_path: &str, spec_path: &str) -> Result<(), Error> {
     let spec = read_spec(&spec_path)?;
-    serve(route_base, port, db_path, &spec.init, &spec.queries).await?;
+    serve(route_base, port, db_path, &spec).await?;
     Ok(())
 }

@@ -1,6 +1,7 @@
 use super::{
+    consts::SPEC_VERSION,
     error::Error,
-    spec::{read_spec, Query, Spec},
+    spec::{version2str, Query, Spec},
 };
 use axum::Json;
 use sqlx::{
@@ -26,8 +27,7 @@ impl DB {
     ///
     /// * `db` - Filepath to the SQLite database.
     /// * `spec` - Filepath to the spec.json
-    pub async fn from_spec(db: &str, spec: &str) -> Result<Self, Error> {
-        let spec: Spec = read_spec(&spec)?;
+    pub async fn from_spec(db: &str, spec: &Spec) -> Result<Self, Error> {
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
                 .create_if_missing(true)
@@ -55,6 +55,7 @@ impl DB {
     /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
     /// * `queries` - A lookup table of SQL queries.
     pub async fn new(
+        &self,
         filepath: &str,
         init_statements: &Vec<String>,
         queries: &HashMap<String, Query>,
@@ -74,6 +75,7 @@ impl DB {
             conn,
             queries: queries.clone(),
         };
+        &self.init_db_info();
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -162,6 +164,16 @@ impl DB {
     pub async fn write_raw_query(&self, sql: &str) -> Result<(), Error> {
         let conn = self.conn.write().await;
         sqlx::query(&sql).execute(conn.deref()).await?;
+        Ok(())
+    }
+    async fn init_db_info(&self) -> Result<(), Error> {
+        self.write_raw_query("create table if not exists corolla_db_info (key text, value text);")
+            .await?;
+        self.write_raw_query(&format!(
+            "insert into corolla_db_info values ('version', '{}');",
+            version2str(&Vec::from(SPEC_VERSION))
+        ))
+        .await?;
         Ok(())
     }
 }
