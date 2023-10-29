@@ -38,6 +38,7 @@ struct QueryArg {
 }
 
 #[derive(Serialize, Deserialize, Clone)]
+#[serde(untagged)]
 enum QueryPart {
     SQL(String),
     Arg(QueryArg),

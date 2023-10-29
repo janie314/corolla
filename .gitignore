@@ -4,6 +4,7 @@ bin/corolla.sqlite3
 corolla.sqlite3
 corolla.sqlite3-shm
 corolla.sqlite3-wal
+spec.json
 
 
 # Added by cargo
