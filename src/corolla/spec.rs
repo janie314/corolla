@@ -20,6 +20,18 @@ pub fn version_cmp(u: &Version, v: &Version) -> Ordering {
     return Ordering::Equal;
 }
 
+pub fn version2str(u: &Version) -> String {
+    u.into_iter()
+        .fold("".to_string(), |a, b| format!("{a}.{b}"))
+}
+
+pub fn str2version(u: &str) -> Version {
+    u.to_string()
+        .split('.')
+        .map(|i| i.parse::<u64>().unwrap_or_default())
+        .collect()
+}
+
 #[derive(Serialize, Deserialize, Clone)]
 struct QueryArg {
     pub arg: String,

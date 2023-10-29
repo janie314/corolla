@@ -1,6 +1,6 @@
 use super::{
     error::Error,
-    spec::{Query, Spec},
+    spec::{read_spec, Query, Spec},
 };
 use axum::Json;
 use sqlx::{
@@ -24,14 +24,14 @@ impl DB {
     ///
     /// # Arguments
     ///
-    /// * `filepath` - Filepath to the SQLite database.
-    /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
-    /// * `queries` - A lookup table of SQL queries.
-    pub async fn from_spec(filepath: &str, spec: &Spec) -> Result<Self, Error> {
+    /// * `db` - Filepath to the SQLite database.
+    /// * `spec` - Filepath to the spec.json
+    pub async fn from_spec(db: &str, spec: &str) -> Result<Self, Error> {
+        let spec: Spec = read_spec(&spec)?;
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
                 .create_if_missing(true)
-                .filename(filepath)
+                .filename(db)
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
@@ -39,15 +39,13 @@ impl DB {
             sqlx::query(&s).execute(&conn).await?;
         }
         let conn = Arc::new(RwLock::new(conn));
-        let queries_aux = spec.queries.clone();
+        let queries = spec.queries.clone();
         /*
          * run conversions
          */
-        for conversion in spec.conversions {}
-        Ok(DB {
-            conn,
-            queries: queries_aux,
-        })
+        // TODO uncomment
+        // for conversion in &spec.conversions {}
+        Ok(DB { conn, queries })
     }
     /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
     ///
@@ -58,8 +56,8 @@ impl DB {
     /// * `queries` - A lookup table of SQL queries.
     pub async fn new(
         filepath: &str,
-        init_statements: &[&str],
-        queries: &[(&str, &str, Vec<String>)],
+        init_statements: &Vec<String>,
+        queries: &HashMap<String, Query>,
     ) -> Result<Self, Error> {
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
@@ -72,19 +70,9 @@ impl DB {
             sqlx::query(s).execute(&conn).await?;
         }
         let conn = Arc::new(RwLock::new(conn));
-        let mut queries_aux: HashMap<String, Query> = HashMap::new();
-        for (name, statement, args) in queries {
-            queries_aux.insert(
-                name.to_string(),
-                Query {
-                    sql_template: statement.to_string(),
-                    args: args.to_vec(),
-                },
-            );
-        }
         let db = DB {
             conn,
-            queries: queries_aux,
+            queries: queries.clone(),
         };
         Ok(db)
     }

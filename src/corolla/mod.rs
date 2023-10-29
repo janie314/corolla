@@ -1,3 +1,4 @@
+use self::{error::Error, spec::read_spec};
 use crate::corolla::db::DB;
 use axum::{
     extract::{Path, Query, State},
@@ -6,8 +7,6 @@ use axum::{
     Json, Router,
 };
 use std::collections::HashMap;
-
-use self::error::Error;
 
 mod db;
 mod error;
@@ -32,7 +31,7 @@ async fn write_query_endpoint(
 ) -> impl IntoResponse {
     db.write_query(&query, &params).await
 }
-/// Runs the Corolla server.
+/// Internal core method that runs the Corolla server.
 ///
 /// # Arguments
 ///
@@ -41,12 +40,12 @@ async fn write_query_endpoint(
 /// * `port` - The port the server will listen on.
 /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
 /// * `queries` - A lookup table of SQL queries.
-pub async fn serve(
+async fn serve(
     route_base: &str,
-    db_path: &str,
     port: i64,
-    init_statements: &[&str],
-    queries: &[(&str, &str, Vec<String>)],
+    db_path: &str,
+    init_statements: &Vec<String>,
+    queries: &HashMap<String, spec::Query>,
 ) -> Result<(), Error> {
     let addr = format!("0.0.0.0:{}", port)
         .parse()
@@ -67,5 +66,18 @@ pub async fn serve(
         .serve(app.into_make_service())
         .await
         .map_err(|_| Error::Server)?;
+    Ok(())
+}
+/// Run a Corolla web server according to server config and spec.json
+///
+/// # Arguments
+///
+/// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
+/// * `port` - The port the server will listen on.
+/// * `db_path` - Filepath to the SQLite database.
+/// * `spec_path` - Filepath to the spec.json.
+pub async fn run(route_base: &str, port: i64, db_path: &str, spec_path: &str) -> Result<(), Error> {
+    let spec = read_spec(&spec_path)?;
+    serve(route_base, port, db_path, &spec.init, &spec.queries).await?;
     Ok(())
 }
