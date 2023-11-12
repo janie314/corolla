@@ -194,7 +194,8 @@ impl DB {
     /// Get table cols
     async fn _get_cols_from_table(&self, table: &str) -> Result<Vec<String>, Error> {
         // TODO: systematic ignore_lock parameter
-        self.re
+        self.read_raw_query("select name from pragma_table_info('t');")
+            .await
     }
     /// Initialize core Corolla sqlite tables
     async fn _init_db_info(&self) -> Result<(), Error> {
