@@ -30,7 +30,9 @@ Now you can make write queries to the database:
 4.
 
 ```bash
-curl query goes here
+curl -s -X POST http://localhost:50000/write/write01 \
+  -H 'content-type: application/json' \
+  -d '{ "a": "sandringham" }'
 ```
 
 ... And read queries!
@@ -38,7 +40,7 @@ curl query goes here
 5.
 
 ```bash
-curl query goes here
+curl -s http://localhost:50000/read/read01
 ```
 
 # Usage
