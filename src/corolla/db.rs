@@ -75,7 +75,7 @@ impl DB {
             conn,
             queries: queries.clone(),
         };
-        let _ = &self.init_db_info();
+        let _ = &self._init_db_info();
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -121,6 +121,31 @@ impl DB {
             Err(Error::WrongNumberOfArgs)
         }
     }
+    /// Executes a read-only query on the SQLite database and returns the result.
+    ///
+    /// # Arguments
+    ///
+    /// * `sql` - SQL statement to execute
+    /// * `args` - Arguments to be bound to the query.
+    pub async fn read_raw_query(
+        &self,
+        sql: &str,
+        args: &HashMap<String, String>,
+    ) -> Result<Json<Vec<Vec<String>>>, Error> {
+        let conn = self.conn.read().await;
+        let statement = sqlx::query(sql);
+        let sql_res = statement.fetch_all(conn.deref()).await?;
+        let mut res = Vec::<Vec<String>>::new();
+        for row in sql_res {
+            let mut v = Vec::<String>::new();
+            for c in 0..(row.len()) {
+                v.push(row.try_get::<String, usize>(c).unwrap_or_default());
+            }
+            res.push(v);
+        }
+        Ok(Json(res))
+    }
+
     /// Executes a write-only query on the SQLite database and returns the result.
     ///
     /// # Arguments
@@ -166,7 +191,13 @@ impl DB {
         sqlx::query(&sql).execute(conn.deref()).await?;
         Ok(())
     }
-    async fn init_db_info(&self) -> Result<(), Error> {
+    /// Get table cols
+    async fn _get_cols_from_table(&self, table: &str) -> Result<Vec<String>, Error> {
+        // TODO: systematic ignore_lock parameter
+        self.re
+    }
+    /// Initialize core Corolla sqlite tables
+    async fn _init_db_info(&self) -> Result<(), Error> {
         self.write_raw_query("create table if not exists corolla_db_info (key text, value text);")
             .await?;
         self.write_raw_query(&format!(
