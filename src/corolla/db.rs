@@ -3,7 +3,6 @@ use super::{
     error::Error,
     spec::{version2str, Query, Spec},
 };
-use axum::Json;
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
@@ -88,7 +87,7 @@ impl DB {
         &self,
         query_name: &str,
         args: &HashMap<String, String>,
-    ) -> Result<Json<Vec<Vec<String>>>, Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let query = self
             .queries
             .get(query_name)
@@ -116,7 +115,7 @@ impl DB {
                 }
                 res.push(v);
             }
-            Ok(Json(res))
+            Ok(res)
         } else {
             Err(Error::WrongNumberOfArgs)
         }
@@ -127,11 +126,7 @@ impl DB {
     ///
     /// * `sql` - SQL statement to execute
     /// * `args` - Arguments to be bound to the query.
-    pub async fn read_raw_query(
-        &self,
-        sql: &str,
-        args: &HashMap<String, String>,
-    ) -> Result<Json<Vec<Vec<String>>>, Error> {
+    pub async fn read_raw_query(&self, sql: &str) -> Result<Vec<Vec<String>>, Error> {
         let conn = self.conn.read().await;
         let statement = sqlx::query(sql);
         let sql_res = statement.fetch_all(conn.deref()).await?;
@@ -143,7 +138,7 @@ impl DB {
             }
             res.push(v);
         }
-        Ok(Json(res))
+        Ok(res)
     }
 
     /// Executes a write-only query on the SQLite database and returns the result.
@@ -194,8 +189,16 @@ impl DB {
     /// Get table cols
     async fn _get_cols_from_table(&self, table: &str) -> Result<Vec<String>, Error> {
         // TODO: systematic ignore_lock parameter
-        self.read_raw_query("select name from pragma_table_info('t');")
-            .await
+        let res: Vec<String> = self
+            .read_raw_query("select name from pragma_table_info('t');")
+            .await?
+            .into_iter()
+            .map(|x| match x.get(0) {
+                Some(r) => r.to_owned(),
+                None => "".to_string(),
+            })
+            .collect();
+        Ok(res)
     }
     /// Initialize core Corolla sqlite tables
     async fn _init_db_info(&self) -> Result<(), Error> {

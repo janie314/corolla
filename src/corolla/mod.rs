@@ -24,7 +24,10 @@ async fn read_query_endpoint(
     Query(params): Query<Args>,
     State(db): State<DB>,
 ) -> impl IntoResponse {
-    db.read_query(&query, &params).await
+    match db.read_query(&query, &params).await {
+        Ok(res) => Json(res).into_response(),
+        Err(e) => e.into_response(),
+    }
 }
 
 #[axum::debug_handler]
