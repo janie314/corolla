@@ -51,6 +51,8 @@ pub struct Query {
     pub sql_template: String,
     /// The query's list of parameter names, in order.
     pub args: Vec<String>,
+    /// The columns a read query returns (should be Some for read queries; None for write queries)
+    pub cols: Option<Vec<String>>,
 }
 
 #[derive(Serialize, Deserialize)]

@@ -19,7 +19,7 @@
           "kind": "bin"
         }
       },
-      "args": [],
+      "args": ["-s", "example_spec.json"],
       "cwd": "${workspaceFolder}"
     },
     {

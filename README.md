@@ -1,8 +1,49 @@
-# corolla
+# Corolla
 
-a lightweight sqlite web server.
+Corolla is a a lightweight SQLite web server. You can use it as bare-bones web
+framework.
 
-# usage
+# Example Application
+
+This Git repostiory includes an example Corolla [spec](TODO:DOCLINK), which is a
+JSON file that defines a Corolla server's available queries.
+
+To run the example Corolla spec:
+
+1. Install [Rust](https://www.rust-lang.org/).
+
+2. Clone this Git repository and navigate into it:
+
+```bash
+git clone https://github.com/janie314/corolla
+cd corolla
+```
+
+3. Start the Corolla server:
+
+```bash
+cargo run -- -s example_spec.json
+```
+
+Now you can make write queries to the database:
+
+4.
+
+```bash
+curl -s -X POST http://localhost:50000/write/write01 \
+  -H 'content-type: application/json' \
+  -d '{ "a": "sandringham" }'
+```
+
+... And read queries!
+
+5.
+
+```bash
+curl -s http://localhost:50000/read/read01
+```
+
+# Usage
 
 ```
 Usage: corolla [OPTIONS]
@@ -16,3 +57,5 @@ Options:
   -h, --help           Print help
   -V, --version        Print version
 ```
+
+For more information

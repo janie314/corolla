@@ -3,7 +3,6 @@ use super::{
     error::Error,
     spec::{version2str, Query, Spec},
 };
-use axum::Json;
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
@@ -18,6 +17,8 @@ pub struct DB {
     conn: Arc<RwLock<Pool<Sqlite>>>,
     /// A lookup table of DB queries.
     queries: HashMap<String, Query>,
+    /// A lookup table of read queries' columns.
+    cols: HashMap<String, Vec<String>>,
 }
 
 impl DB {
@@ -45,37 +46,13 @@ impl DB {
          */
         // TODO uncomment
         // for conversion in &spec.conversions {}
-        Ok(DB { conn, queries })
-    }
-    /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
-    ///
-    /// # Arguments
-    ///
-    /// * `filepath` - Filepath to the SQLite database.
-    /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
-    /// * `queries` - A lookup table of SQL queries.
-    pub async fn new(
-        &self,
-        filepath: &str,
-        init_statements: &Vec<String>,
-        queries: &HashMap<String, Query>,
-    ) -> Result<Self, Error> {
-        let conn = SqlitePool::connect_with(
-            SqliteConnectOptions::new()
-                .create_if_missing(true)
-                .filename(filepath)
-                .journal_mode(SqliteJournalMode::Wal),
-        )
-        .await?;
-        for s in init_statements {
-            sqlx::query(s).execute(&conn).await?;
-        }
-        let conn = Arc::new(RwLock::new(conn));
+        let cols = HashMap::<String, Vec<String>>::new();
         let db = DB {
             conn,
-            queries: queries.clone(),
+            queries,
+            cols,
         };
-        let _ = &self.init_db_info();
+        let _ = db._init_db_info().await?;
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -88,7 +65,7 @@ impl DB {
         &self,
         query_name: &str,
         args: &HashMap<String, String>,
-    ) -> Result<Json<Vec<Vec<String>>>, Error> {
+    ) -> Result<Vec<Vec<String>>, Error> {
         let query = self
             .queries
             .get(query_name)
@@ -108,7 +85,9 @@ impl DB {
             }
             let sql_res = statement.fetch_all(conn.deref()).await?;
             let mut res = Vec::<Vec<String>>::new();
-            res.push(query.args.clone());
+            if let Some(cols) = &query.cols {
+                res.push(cols.clone());
+            }
             for row in sql_res {
                 let mut v = Vec::<String>::new();
                 for c in 0..(row.len()) {
@@ -116,11 +95,32 @@ impl DB {
                 }
                 res.push(v);
             }
-            Ok(Json(res))
+            Ok(res)
         } else {
             Err(Error::WrongNumberOfArgs)
         }
     }
+    /// Executes a read-only query on the SQLite database and returns the result.
+    ///
+    /// # Arguments
+    ///
+    /// * `sql` - SQL statement to execute
+    /// * `args` - Arguments to be bound to the query.
+    pub async fn read_raw_query(&self, sql: &str) -> Result<Vec<Vec<String>>, Error> {
+        let conn = self.conn.read().await;
+        let statement = sqlx::query(sql);
+        let sql_res = statement.fetch_all(conn.deref()).await?;
+        let mut res = Vec::<Vec<String>>::new();
+        for row in sql_res {
+            let mut v = Vec::<String>::new();
+            for c in 0..(row.len()) {
+                v.push(row.try_get::<String, usize>(c).unwrap_or_default());
+            }
+            res.push(v);
+        }
+        Ok(res)
+    }
+
     /// Executes a write-only query on the SQLite database and returns the result.
     ///
     /// # Arguments
@@ -166,7 +166,8 @@ impl DB {
         sqlx::query(&sql).execute(conn.deref()).await?;
         Ok(())
     }
-    async fn init_db_info(&self) -> Result<(), Error> {
+    /// Initialize core Corolla sqlite tables
+    async fn _init_db_info(&self) -> Result<(), Error> {
         self.write_raw_query("create table if not exists corolla_db_info (key text, value text);")
             .await?;
         self.write_raw_query(&format!(
