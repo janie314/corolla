@@ -17,6 +17,8 @@ pub struct DB {
     conn: Arc<RwLock<Pool<Sqlite>>>,
     /// A lookup table of DB queries.
     queries: HashMap<String, Query>,
+    /// A lookup table of read queries' columns.
+    cols: HashMap<String, Vec<String>>,
 }
 
 impl DB {
@@ -44,37 +46,13 @@ impl DB {
          */
         // TODO uncomment
         // for conversion in &spec.conversions {}
-        Ok(DB { conn, queries })
-    }
-    /// Construct a new DB object, which consists of a pooled SQLite connection wrapped by a read/write lock and a query lookup.
-    ///
-    /// # Arguments
-    ///
-    /// * `filepath` - Filepath to the SQLite database.
-    /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
-    /// * `queries` - A lookup table of SQL queries.
-    pub async fn new(
-        &self,
-        filepath: &str,
-        init_statements: &Vec<String>,
-        queries: &HashMap<String, Query>,
-    ) -> Result<Self, Error> {
-        let conn = SqlitePool::connect_with(
-            SqliteConnectOptions::new()
-                .create_if_missing(true)
-                .filename(filepath)
-                .journal_mode(SqliteJournalMode::Wal),
-        )
-        .await?;
-        for s in init_statements {
-            sqlx::query(s).execute(&conn).await?;
-        }
-        let conn = Arc::new(RwLock::new(conn));
+        let cols = HashMap::<String, Vec<String>>::new();
         let db = DB {
             conn,
-            queries: queries.clone(),
+            queries,
+            cols,
         };
-        let _ = &self._init_db_info();
+        let _ = db._init_db_info().await?;
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -107,7 +85,9 @@ impl DB {
             }
             let sql_res = statement.fetch_all(conn.deref()).await?;
             let mut res = Vec::<Vec<String>>::new();
-            res.push(query.args.clone());
+            if let Some(cols) = &query.cols {
+                res.push(cols.clone());
+            }
             for row in sql_res {
                 let mut v = Vec::<String>::new();
                 for c in 0..(row.len()) {
@@ -185,20 +165,6 @@ impl DB {
         let conn = self.conn.write().await;
         sqlx::query(&sql).execute(conn.deref()).await?;
         Ok(())
-    }
-    /// Get table cols
-    async fn _get_cols_from_table(&self, table: &str) -> Result<Vec<String>, Error> {
-        // TODO: systematic ignore_lock parameter
-        let res: Vec<String> = self
-            .read_raw_query("select name from pragma_table_info('t');")
-            .await?
-            .into_iter()
-            .map(|x| match x.get(0) {
-                Some(r) => r.to_owned(),
-                None => "".to_string(),
-            })
-            .collect();
-        Ok(res)
     }
     /// Initialize core Corolla sqlite tables
     async fn _init_db_info(&self) -> Result<(), Error> {
