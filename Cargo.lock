@@ -314,7 +314,7 @@ checksum = "28c122c3980598d243d63d9a704629a2d748d101f278052ff068be5a4423ab6f"
 
 [[package]]
 name = "corolla"
-version = "0.1.2"
+version = "0.1.4"
 dependencies = [
  "axum",
  "clap",
