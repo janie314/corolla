@@ -48,9 +48,7 @@ async fn write_query_endpoint(
 /// * `init_statements` - A list of SQL statements that will be executed to initialize the database, in order.
 /// * `queries` - A lookup table of SQL queries.
 async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Result<(), Error> {
-    let addr = format!("0.0.0.0:{}", port)
-        .parse()
-        .map_err(|_| Error::BadPort)?;
+    let addr = format!("0.0.0.0:{}", port);
     let conn = DB::from_spec(db_path, &spec).await?;
     println!("trying to listen on {}", &addr);
     let app = Router::new()
@@ -63,8 +61,8 @@ async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Resul
             post(write_query_endpoint),
         )
         .with_state(conn);
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
+    axum::serve(listener, app.into_make_service())
         .await
         .map_err(|_| Error::Server)?;
     Ok(())
