@@ -18,7 +18,7 @@ pub fn version_cmp(u: &Version, v: &Version) -> Ordering {
             return Ordering::Greater;
         }
     }
-    return Ordering::Equal;
+    Ordering::Equal
 }
 
 pub fn version2str(u: &Version) -> String {
