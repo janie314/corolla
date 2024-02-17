@@ -3,6 +3,7 @@ use super::{
     error::Error,
     spec::{version2str, Query, Spec},
 };
+use log::{debug, info};
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
@@ -29,6 +30,7 @@ impl DB {
     /// * `db` - Filepath to the SQLite database.
     /// * `spec` - Filepath to the spec.json
     pub async fn from_spec(db: &str, spec: &Spec) -> Result<Self, Error> {
+        info!("opening sqlite db {db}");
         let conn = SqlitePool::connect_with(
             SqliteConnectOptions::new()
                 .create_if_missing(true)
@@ -36,6 +38,7 @@ impl DB {
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
+        info!("running init statements from spec");
         for s in &spec.init {
             sqlx::query(&s).execute(&conn).await?;
         }
@@ -52,7 +55,8 @@ impl DB {
             queries,
             cols,
         };
-        let _ = db._init_db_info().await?;
+        info!("initializing corolla db tables");
+        let _ = db._init_corolla_tables().await?;
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -123,7 +127,7 @@ impl DB {
 
     /// Executes a write-only query on the SQLite database and returns the result.
     ///
-    /// # Arguments
+    /// Arguments:
     ///
     /// * `query_name` - The code name of the query in the query lookup table.
     /// * `args` - Arguments to be bound to the query.
@@ -157,17 +161,19 @@ impl DB {
     }
     /// Execute a SQL statement that modifies the database
     ///
-    /// # Arguments
+    /// Arguments
     ///
     /// * `sql` - SQL statement to execute
     /// TODO: This needs to take a vector of SQL statements
     pub async fn write_raw_query(&self, sql: &str) -> Result<(), Error> {
+        debug!("waiting for write lock");
         let conn = self.conn.write().await;
+        debug!("executing sql statement {sql}");
         sqlx::query(&sql).execute(conn.deref()).await?;
         Ok(())
     }
     /// Initialize core Corolla sqlite tables
-    async fn _init_db_info(&self) -> Result<(), Error> {
+    async fn _init_corolla_tables(&self) -> Result<(), Error> {
         self.write_raw_query("create table if not exists corolla_db_info (key text, value text);")
             .await?;
         self.write_raw_query(&format!(

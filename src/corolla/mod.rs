@@ -9,6 +9,7 @@ use axum::{
     routing::{get, post},
     Json, Router,
 };
+use log::info;
 use std::collections::HashMap;
 
 mod consts;
@@ -40,7 +41,7 @@ async fn write_query_endpoint(
 }
 /// Internal core method that runs the Corolla server.
 ///
-/// # Arguments
+/// Arguments
 ///
 /// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
 /// * `db_path` - Filepath to the SQLite database.
@@ -50,7 +51,7 @@ async fn write_query_endpoint(
 async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Result<(), Error> {
     let addr = format!("0.0.0.0:{}", port);
     let conn = DB::from_spec(db_path, &spec).await?;
-    println!("trying to listen on {}", &addr);
+    info!("trying to listen on {}", &addr);
     let app = Router::new()
         .route(
             &format!("{route_base}/read/:query"),
@@ -69,7 +70,7 @@ async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Resul
 }
 /// Run a Corolla web server according to server config and spec.json
 ///
-/// # Arguments
+/// Arguments
 ///
 /// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
 /// * `port` - The port the server will listen on.

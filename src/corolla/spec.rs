@@ -1,4 +1,5 @@
 use super::error::Error;
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::{cmp::Ordering, collections::HashMap, fs};
 
@@ -70,7 +71,9 @@ pub struct Spec {
     pub conversions: Vec<Conversion>,
 }
 
+/// Reads spec.json file
 pub fn read_spec(path: &str) -> Result<Spec, Error> {
+    info!("reading spec file {path}");
     let file = fs::File::open(path)?;
     let spec: Spec = serde_json::from_reader(file)?;
     Ok(spec)
