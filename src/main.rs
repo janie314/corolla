@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, process};
 
 use clap::Parser;
 use log::{error, info, LevelFilter};
@@ -43,7 +43,10 @@ async fn main() {
         let res = corolla::run(&args.route, args.port, &args.db, &args.spec).await;
         match res {
             Ok(_) => (),
-            Err(e) => error!("{:?}", e),
+            Err(e) => {
+                error!("{:?}", e);
+                process::exit(1)
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ pub type Version = Vec<u64>;
 
 /// Compares two `Version` values.
 ///
-/// # Arguments
+/// Arguments:
 /// * `u`, `v` - References to `Version` types.
 pub fn version_cmp(u: &Version, v: &Version) -> Ordering {
     for (a, b) in u.iter().zip(v) {

@@ -25,7 +25,7 @@ async fn read_query_endpoint(
     Query(params): Query<Args>,
     State(db): State<DB>,
 ) -> impl IntoResponse {
-    match db.read_query(&query, &params).await {
+    match db.read_query(&query, &params, None).await {
         Ok(res) => Json(res).into_response(),
         Err(e) => e.into_response(),
     }
@@ -37,11 +37,11 @@ async fn write_query_endpoint(
     State(db): State<DB>,
     Json(params): Json<Args>,
 ) -> impl IntoResponse {
-    db.write_query(&query, &params).await
+    db.write_query(&query, &params, None).await
 }
 /// Internal core method that runs the Corolla server.
 ///
-/// Arguments
+/// Arguments:
 ///
 /// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
 /// * `db_path` - Filepath to the SQLite database.
@@ -70,7 +70,7 @@ async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Resul
 }
 /// Run a Corolla web server according to server config and spec.json
 ///
-/// Arguments
+/// Arguments:
 ///
 /// * `route_base` - The base HTTP route. For instance, if `route_base == "/api"` then the `/read/:query` endpoint will be served under `/api/read/:query`.
 /// * `port` - The port the server will listen on.

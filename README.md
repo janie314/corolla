@@ -59,3 +59,8 @@ Options:
 ```
 
 For more information
+
+# TODO
+
+- `for i in {1..10000}; do curl ...` leads to a lot of connection refusedes.
+- create JS spec for spec.json
