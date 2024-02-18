@@ -31,6 +31,10 @@ impl From<sqlx::Error> for Error {
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
-        (StatusCode::INTERNAL_SERVER_ERROR, "what was the problem").into_response()
+        (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "there was a problem running your query",
+        )
+            .into_response()
     }
 }

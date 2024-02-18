@@ -21,11 +21,15 @@ pub fn version_cmp(u: &Version, v: &Version) -> Ordering {
     Ordering::Equal
 }
 
+/// Conversions a `Version` object into a string.
+/// E.g. [1,2,3] becomes "1.2.3".
+/// TODO: make this a `.to_string()` method?
 pub fn version2str(u: &Version) -> String {
     u.into_iter()
         .fold("".to_string(), |a, b| format!("{a}.{b}"))
 }
 
+/// Inverse of version2str.
 pub fn str2version(u: &str) -> Version {
     u.to_string()
         .split('.')
@@ -56,13 +60,16 @@ pub struct Query {
     pub cols: Option<Vec<String>>,
 }
 
+/// Represents a DB conversion, which will be executed upon startup if the current DB version is <= Conversion.max.
+/// If the conversion is executed, the current DB version will become Conversion.new_version.
 #[derive(Serialize, Deserialize)]
 pub struct Conversion {
-    pub min: Version,
+    pub max: Version,
     pub new_version: Version,
     pub queries: Vec<String>,
 }
 
+/// The spec.json format, in Rust struct form.
 #[derive(Serialize, Deserialize)]
 pub struct Spec {
     pub version: Version,
@@ -71,7 +78,7 @@ pub struct Spec {
     pub conversions: Vec<Conversion>,
 }
 
-/// Reads spec.json file
+/// Reads a spec.json file into a `Spec` object.
 pub fn read_spec(path: &str) -> Result<Spec, Error> {
     info!("reading spec file {path}");
     let file = fs::File::open(path)?;
