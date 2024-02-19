@@ -1,7 +1,6 @@
-use std::{env, process};
-
 use clap::Parser;
 use log::{error, info, LevelFilter};
+use std::{env, process};
 
 mod corolla;
 

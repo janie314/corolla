@@ -16,6 +16,7 @@ mod consts;
 mod db;
 mod error;
 mod spec;
+mod version;
 
 pub type Args = HashMap<String, String>;
 

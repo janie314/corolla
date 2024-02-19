@@ -1,7 +1,8 @@
 use super::{
     consts::SPEC_VERSION,
     error::Error,
-    spec::{version2str, Query, Spec},
+    spec::{Query, Spec},
+    version::{InstanceVersion, SpecVersion, Version},
 };
 use log::{debug, info};
 use sqlx::{
@@ -47,7 +48,6 @@ impl DB {
         /*
          * run conversions
          */
-        // TODO uncomment
         // for conversion in &spec.conversions {}
         let cols = HashMap::<String, Vec<String>>::new();
         let db = DB {
@@ -150,7 +150,37 @@ impl DB {
         }
         Ok(res)
     }
-
+    /// Executes a read-only query on the SQLite database and returns a single row.
+    ///
+    /// Arguments:
+    ///
+    /// * `sql` - SQL statement to execute
+    /// * `args` - Arguments to be bound to the query.
+    /// * `conn` - Can pass a `conn.read()` here to execute this method with a shared lock.
+    pub async fn read_one_raw_query(
+        &self,
+        sql: &str,
+        conn: Option<RwLockReadGuard<'_, Pool<Sqlite>>>,
+    ) -> Result<Vec<String>, Error> {
+        let conn = match conn {
+            Some(c) => {
+                debug!("using shared read lock");
+                c
+            }
+            None => {
+                debug!("waiting for read lock");
+                self.conn.read().await
+            }
+        };
+        debug!("executing sql statement {sql}");
+        let statement = sqlx::query(sql);
+        let row = statement.fetch_one(conn.deref()).await?;
+        let mut res: Vec<String> = vec![];
+        for c in 0..(row.len()) {
+            res.push(row.try_get::<String, usize>(c).unwrap_or_default());
+        }
+        Ok(res)
+    }
     /// Executes a write-only query on the SQLite database and returns the result.
     ///
     /// Arguments:
@@ -229,14 +259,24 @@ impl DB {
             None,
         )
         .await?;
+        let version_str: String = Version::from(SPEC_VERSION).into();
         self.write_raw_query(
             &format!(
                 "insert into corolla_db_info values ('version', '{}');",
-                version2str(&Vec::from(SPEC_VERSION))
+                version_str
             ),
             None,
         )
         .await?;
         Ok(())
+    }
+    /// Get current DB instance version
+    async fn _instance_version(&self) -> Result<InstanceVersion, Error> {
+        let res = self
+            .read_one_raw_query(
+                "select value from corolla_db_info where key = 'version';",
+                None,
+            )
+            .await?;
     }
 }
