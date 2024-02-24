@@ -278,5 +278,9 @@ impl DB {
                 None,
             )
             .await?;
+        match res.get(0) {
+            Some(val) => Ok(InstanceVersion::from(val)),
+            None => Err(Error::EmptyResultRow),
+        }
     }
 }

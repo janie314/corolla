@@ -1,8 +1,11 @@
 /// This file contains methods for both spec versions and versions used by an instance of a Corolla DB.
 use std::{cmp::Ordering, ops::Deref};
 
+use serde::{Deserialize, Serialize};
+
 /// A general version type.
 /// Uses [this Rust trick](https://stackoverflow.com/a/25415289).
+#[derive(Serialize, Deserialize)]
 pub struct Version(Vec<u64>);
 
 impl Deref for Version {
@@ -13,9 +16,11 @@ impl Deref for Version {
     }
 }
 
+impl Eq for Version {}
+
 impl Ord for Version {
     fn cmp(&self, other: &Self) -> Ordering {
-        for (a, b) in self.iter().zip(other) {
+        for (a, b) in self.0.iter().zip(&other.0) {
             if a < b {
                 return Ordering::Less;
             }
@@ -29,18 +34,13 @@ impl Ord for Version {
 
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(&self.cmp(&other))
+        Some(self.cmp(&other))
     }
 }
 
 impl PartialEq for Version {
     fn eq(&self, other: &Self) -> bool {
-        for (a, b) in self.iter().zip(other) {
-            if a != b {
-                return false;
-            }
-        }
-        true
+        self.0.iter().zip(&other.0).filter(|&(a, b)| a != b).count() == 0
     }
 }
 
@@ -52,13 +52,14 @@ impl Into<String> for Version {
     }
 }
 
-impl From<String> for Version {
-    fn from(value: String) -> Self {
-        value
-            .to_string()
-            .split('.')
-            .map(|i| i.parse::<u64>().unwrap_or_default())
-            .collect()
+impl From<&String> for InstanceVersion {
+    fn from(value: &String) -> Self {
+        InstanceVersion {
+            0: value
+                .split('.')
+                .map(|i| i.parse::<u64>().unwrap_or_default())
+                .collect(),
+        }
     }
 }
 
