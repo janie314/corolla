@@ -49,6 +49,7 @@ impl DB {
             cols,
         };
         info!("checking if corolla DB has been initialized");
+        // if DB is initialized (can find a corolla instance version inside it), then run the conversions
         match db._instance_version().await? {
             Some(v) => db._run_conversions(spec, v).await?,
             _ => (),
