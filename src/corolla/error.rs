@@ -3,7 +3,6 @@ use axum::{http::StatusCode, response::IntoResponse};
 /// An error type for a SQLite DB. Wraps several types of errors and implements axum_core::response::into_response::IntoResponse.
 #[derive(Debug)]
 pub enum Error {
-    EmptyResultRow,
     File(std::io::Error),
     JSON(serde_json::Error),
     Server,

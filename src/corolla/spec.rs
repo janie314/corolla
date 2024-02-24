@@ -30,7 +30,7 @@ pub struct Query {
 /// If the conversion is executed, the current DB version will become Conversion.new_version.
 #[derive(Serialize, Deserialize)]
 pub struct Conversion {
-    pub max: InstanceVersion,
+    pub max_version: InstanceVersion,
     pub new_version: InstanceVersion,
     pub queries: Vec<String>,
 }

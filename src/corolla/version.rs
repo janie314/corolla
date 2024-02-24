@@ -52,9 +52,9 @@ impl Into<String> for Version {
     }
 }
 
-impl From<&String> for InstanceVersion {
+impl From<&String> for Version {
     fn from(value: &String) -> Self {
-        InstanceVersion {
+        Version {
             0: value
                 .split('.')
                 .map(|i| i.parse::<u64>().unwrap_or_default())

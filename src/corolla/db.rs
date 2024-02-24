@@ -1,8 +1,8 @@
 use super::{
-    consts::SPEC_VERSION,
+    consts::SPEC_SCHEMA_VERSION,
     error::Error,
     spec::{Query, Spec},
-    version::{InstanceVersion, SpecVersion, Version},
+    version::{InstanceVersion, Version},
 };
 use log::{debug, info};
 use sqlx::{
@@ -39,22 +39,28 @@ impl DB {
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
-        info!("running init statements from spec");
-        for s in &spec.init {
-            sqlx::query(&s).execute(&conn).await?;
-        }
+        debug!("init DB object");
         let conn = Arc::new(RwLock::new(conn));
         let queries = spec.queries.clone();
-        /*
-         * run conversions
-         */
-        // for conversion in &spec.conversions {}
         let cols = HashMap::<String, Vec<String>>::new();
         let db = DB {
             conn,
             queries,
             cols,
         };
+        info!("checking if corolla DB has been initialized");
+        match db.instance_version().await? {
+            Some(v) => db.run_conversions(v),
+            _ => (),
+        };
+        info!("running init statements from spec");
+        for s in &spec.init {
+            sqlx::query(&s).execute(&conn).await?;
+        }
+        /*
+         * run conversions
+         */
+        // for conversion in &spec.conversions {}
         info!("initializing corolla db tables");
         let _ = db._init_corolla_tables().await?;
         Ok(db)
@@ -157,7 +163,7 @@ impl DB {
     /// * `sql` - SQL statement to execute
     /// * `args` - Arguments to be bound to the query.
     /// * `conn` - Can pass a `conn.read()` here to execute this method with a shared lock.
-    pub async fn read_one_raw_query(
+    pub async fn _read_one_raw_query(
         &self,
         sql: &str,
         conn: Option<RwLockReadGuard<'_, Pool<Sqlite>>>,
@@ -259,7 +265,7 @@ impl DB {
             None,
         )
         .await?;
-        let version_str: String = Version::from(SPEC_VERSION).into();
+        let version_str: String = Version::from(SPEC_SCHEMA_VERSION).into();
         self.write_raw_query(
             &format!(
                 "insert into corolla_db_info values ('version', '{}');",
@@ -271,16 +277,21 @@ impl DB {
         Ok(())
     }
     /// Get current DB instance version
-    async fn _instance_version(&self) -> Result<InstanceVersion, Error> {
+    pub async fn instance_version(&self) -> Result<Option<InstanceVersion>, Error> {
         let res = self
-            .read_one_raw_query(
+            ._read_one_raw_query(
                 "select value from corolla_db_info where key = 'version';",
                 None,
             )
             .await?;
         match res.get(0) {
-            Some(val) => Ok(InstanceVersion::from(val)),
-            None => Err(Error::EmptyResultRow),
+            Some(val) => Ok(Some(InstanceVersion::from(val))),
+            None => Ok(None),
         }
+    }
+
+    /// Run conversions specified by a spec.json file
+    pub async fn run_conversions(&self, v: Version) {
+        todo!()
     }
 }
