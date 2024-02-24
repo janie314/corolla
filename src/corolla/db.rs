@@ -49,18 +49,14 @@ impl DB {
             cols,
         };
         info!("checking if corolla DB has been initialized");
-        match db.instance_version().await? {
-            Some(v) => db.run_conversions(v),
+        match db._instance_version().await? {
+            Some(v) => db._run_conversions(spec, v).await?,
             _ => (),
         };
         info!("running init statements from spec");
         for s in &spec.init {
-            sqlx::query(&s).execute(&conn).await?;
+            db.write_raw_query(&s, None).await?;
         }
-        /*
-         * run conversions
-         */
-        // for conversion in &spec.conversions {}
         info!("initializing corolla db tables");
         let _ = db._init_corolla_tables().await?;
         Ok(db)
@@ -128,7 +124,7 @@ impl DB {
     /// * `sql` - SQL statement to execute
     /// * `args` - Arguments to be bound to the query.
     /// * `conn` - Can pass a `conn.read()` here to execute this method with a shared lock.
-    pub async fn read_raw_query(
+    async fn _read_raw_query(
         &self,
         sql: &str,
         conn: Option<RwLockReadGuard<'_, Pool<Sqlite>>>,
@@ -239,7 +235,7 @@ impl DB {
     /// * `sql` - SQL statement to execute
     /// * `conn` - Can pass a `conn.write()` here to execute this method with a shared lock.
     /// TODO: This needs to take a vector of SQL statements
-    pub async fn write_raw_query(
+    async fn write_raw_query(
         &self,
         sql: &str,
         conn: Option<RwLockWriteGuard<'_, Pool<Sqlite>>>,
@@ -277,7 +273,7 @@ impl DB {
         Ok(())
     }
     /// Get current DB instance version
-    pub async fn instance_version(&self) -> Result<Option<InstanceVersion>, Error> {
+    async fn _instance_version(&self) -> Result<Option<InstanceVersion>, Error> {
         let res = self
             ._read_one_raw_query(
                 "select value from corolla_db_info where key = 'version';",
@@ -291,7 +287,18 @@ impl DB {
     }
 
     /// Run conversions specified by a spec.json file
-    pub async fn run_conversions(&self, v: Version) {
+    async fn _run_conversions(&self, spec: &Spec, v: Version) -> Result<(), Error> {
+        info!("running DB conversions");
+        for (i, conversion) in spec.conversions.iter().enumerate() {
+            if v <= conversion.max_version {
+                info!("running conversion {i}");
+                for query in &conversion.queries {
+                    self.write_raw_query(&query, None).await?;
+                }
+            } else {
+                info!("skipping conversion {i}");
+            }
+        }
         todo!()
     }
 }
