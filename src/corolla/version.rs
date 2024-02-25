@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// A general version type.
 /// Uses [this Rust trick](https://stackoverflow.com/a/25415289).
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Version(Vec<u64>);
 
 impl Deref for Version {
@@ -54,8 +54,8 @@ impl Into<String> for Version {
     }
 }
 
-impl From<&String> for Version {
-    fn from(value: &String) -> Self {
+impl From<&str> for Version {
+    fn from(value: &str) -> Self {
         Version {
             0: value
                 .split('.')
@@ -97,9 +97,31 @@ mod tests {
     use super::*;
 
     #[test]
-    /// test versions convert to string appropriately
-    fn test_version2str() {
+    /// versions convert to strings appropriately
+    fn version2str() {
         let v = Version::from([1, 2, 3]);
         assert_eq!(v.to_string(), "1.2.3".to_owned());
+        let v = Version::from([29, 000]);
+        assert_eq!(v.to_string(), "29.0".to_owned());
+    }
+
+    #[test]
+    /// strings convert to versions appropriately
+    fn str2version() {
+        let v = Version::from("1.2.3");
+        let w = Version::from([1, 2, 3]);
+        assert_eq!(v, w);
+    }
+
+    #[test]
+    /// version comparison, equality traits
+    fn cmp_traits_version() {
+        let v = Version::from([1, 2, 3]);
+        let w = Version::from([1, 2, 3]);
+        assert_eq!(v, w);
+        let w = Version::from([1, 2, 38]);
+        assert_ne!(v, w);
+        assert!(v <= w);
+        assert!(w > v);
     }
 }

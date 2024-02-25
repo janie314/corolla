@@ -274,7 +274,7 @@ impl DB {
             .await;
         match res {
             Ok(res) => match res.get(0) {
-                Some(val) => Ok(Some(InstanceVersion::from(val))),
+                Some(val) => Ok(Some(InstanceVersion::from(val.as_ref()))),
                 None => Ok(None),
             },
             Err(err) => match err {
