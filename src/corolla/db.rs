@@ -1,6 +1,6 @@
 use super::{
     error::Error,
-    spec::{Query, Spec},
+    spec::{Queries, Spec},
     version::{InstanceVersion, Version},
 };
 use log::{debug, info};
@@ -17,7 +17,7 @@ pub struct DB {
     /// A read/write lock on top of a SQLite connection pool.
     conn: Arc<RwLock<Pool<Sqlite>>>,
     /// A lookup table of DB queries.
-    queries: HashMap<String, Query>,
+    queries: Queries,
     /// A lookup table of read queries' columns.
     cols: HashMap<String, Vec<String>>,
 }
@@ -76,6 +76,7 @@ impl DB {
     ) -> Result<Vec<Vec<String>>, Error> {
         let query = self
             .queries
+            .read
             .get(query_name)
             .ok_or_else(|| Error::QueryDoesNotExist)?;
         if args.keys().len() == query.args.len() {
@@ -102,9 +103,7 @@ impl DB {
             }
             let sql_res = statement.fetch_all(conn.deref()).await?;
             let mut res = Vec::<Vec<String>>::new();
-            if let Some(cols) = &query.cols {
-                res.push(cols.clone());
-            }
+            res.push(query.cols.clone());
             for row in sql_res {
                 let mut v = Vec::<String>::new();
                 for c in 0..(row.len()) {
@@ -198,6 +197,7 @@ impl DB {
     ) -> Result<(), Error> {
         let query = self
             .queries
+            .write
             .get(query_name)
             .ok_or_else(|| Error::QueryDoesNotExist)?;
         if args.keys().len() == query.args.len() {

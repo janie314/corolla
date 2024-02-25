@@ -15,15 +15,24 @@ enum QueryPart {
     Arg(QueryArg),
 }
 
-/// Represents a database query.
+/// Represents a read-only database query (returns rows, does not change DB).
 #[derive(Serialize, Deserialize, Clone)]
-pub struct Query {
+pub struct ReadQuery {
     /// [A SQLite statement with parameters.](https://www.sqlite.org/c3ref/bind_blob.html) Only `?` parameters are tested.
     pub sql_template: String,
     /// The query's list of parameter names, in order.
     pub args: Vec<String>,
-    /// The columns a read query returns (should be Some for read queries; None for write queries)
-    pub cols: Option<Vec<String>>,
+    /// The columns the query results will use
+    pub cols: Vec<String>,
+}
+
+/// Represents a write-only database query (can return rows, changes DB).
+#[derive(Serialize, Deserialize, Clone)]
+pub struct WriteQuery {
+    /// [A SQLite statement with parameters.](https://www.sqlite.org/c3ref/bind_blob.html) Only `?` parameters are tested.
+    pub sql_template: String,
+    /// The query's list of parameter names, in order.
+    pub args: Vec<String>,
 }
 
 /// Represents a DB conversion, which will be executed upon startup if the current DB version is <= Conversion.max.
@@ -35,12 +44,18 @@ pub struct Conversion {
     pub queries: Vec<String>,
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Queries {
+    pub read: HashMap<String, ReadQuery>,
+    pub write: HashMap<String, WriteQuery>,
+}
+
 /// The spec.json format, in Rust struct form.
 #[derive(Serialize, Deserialize)]
 pub struct Spec {
     pub version: InstanceVersion,
     pub init: Vec<String>,
-    pub queries: HashMap<String, Query>,
+    pub queries: Queries,
     pub conversions: Vec<Conversion>,
 }
 
