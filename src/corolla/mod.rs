@@ -52,7 +52,7 @@ async fn write_query_endpoint(
 async fn serve(route_base: &str, port: i64, db_path: &str, spec: &Spec) -> Result<(), Error> {
     let addr = format!("0.0.0.0:{}", port);
     let conn = DB::from_spec(db_path, &spec).await?;
-    info!("trying to listen on {}", &addr);
+    info!("listening on {}", &addr);
     let app = Router::new()
         .route(
             &format!("{route_base}/read/:query"),

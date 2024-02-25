@@ -38,7 +38,7 @@ impl DB {
                 .journal_mode(SqliteJournalMode::Wal),
         )
         .await?;
-        debug!("init DB object");
+        debug!("initializing DB object");
         let conn = Arc::new(RwLock::new(conn));
         let queries = spec.queries.clone();
         let cols = HashMap::<String, Vec<String>>::new();
@@ -51,13 +51,13 @@ impl DB {
         // if DB is initialized (can find a corolla instance version inside it), then run the conversions
         match db._instance_version().await? {
             Some(v) => db._run_conversions(spec, v).await?,
-            _ => (),
+            _ => info!("DB is not initialized yet"),
         };
         info!("running init statements from spec");
         for s in &spec.init {
             db.write_raw_query(&s, None).await?;
         }
-        info!("initializing corolla db tables");
+        info!("initializing corolla DB tables");
         let _ = db._init_corolla_tables(&spec).await?;
         Ok(db)
     }
@@ -257,14 +257,14 @@ impl DB {
     /// Initialize core Corolla sqlite tables
     async fn _init_corolla_tables(&self, spec: &Spec) -> Result<(), Error> {
         self.write_raw_query(
-            "create table if not exists corolla_db_info (key text, value text);",
+            "create table if not exists corolla_db_info (key text unique not null, value text);",
             None,
         )
         .await?;
         let version_str: String = spec.version.clone().into();
         self.write_raw_query(
             &format!(
-                "insert into corolla_db_info values ('version', '{}');",
+                "insert or replace into corolla_db_info values ('version', '{}');",
                 version_str
             ),
             None,
@@ -314,6 +314,6 @@ impl DB {
                 info!("skipping conversion {i}");
             }
         }
-        todo!()
+        Ok(())
     }
 }
