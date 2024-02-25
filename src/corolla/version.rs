@@ -101,6 +101,7 @@ mod tests {
     fn version2str() {
         let v = Version::from([1, 2, 3]);
         assert_eq!(v.to_string(), "1.2.3".to_owned());
+        assert_eq!(format!("{v}"), "1.2.3".to_owned());
         let v = Version::from([29, 000]);
         assert_eq!(v.to_string(), "29.0".to_owned());
     }
@@ -110,6 +111,9 @@ mod tests {
     fn str2version() {
         let v = Version::from("1.2.3");
         let w = Version::from([1, 2, 3]);
+        assert_eq!(v, w);
+        let v = Version::from("10.20");
+        let w = Version::from([10, 20]);
         assert_eq!(v, w);
     }
 
