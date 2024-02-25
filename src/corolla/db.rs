@@ -3,7 +3,7 @@ use super::{
     spec::{Query, Spec},
     version::{InstanceVersion, Version},
 };
-use log::{debug, error, info};
+use log::{debug, info};
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
