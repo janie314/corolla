@@ -91,3 +91,15 @@ pub type SpecVersion = Version;
 
 /// The version of a particular instance of a Corolla DB. Used to decide whether or not conversions in the instance's spec.json should be run.
 pub type InstanceVersion = Version;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    /// test versions convert to string appropriately
+    fn test_version2str() {
+        let v = Version::from([1, 2, 3]);
+        assert_eq!(v.to_string(), "1.2.3".to_owned());
+    }
+}

@@ -62,6 +62,5 @@ For more information
 
 # TODO
 
-- create JS schema for spec.json
 - tests
 - benchmarks
