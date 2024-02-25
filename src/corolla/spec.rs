@@ -74,6 +74,7 @@ where
 mod tests {
     use super::*;
     use crate::corolla::version::Version;
+    use pretty_assertions::assert_eq;
     use std::{env, path::Path};
 
     #[test]
