@@ -1,5 +1,5 @@
 /// This file contains methods for both spec versions and versions used by an instance of a Corolla DB.
-use std::{cmp::Ordering, ops::Deref, path::Display};
+use std::{cmp::Ordering, ops::Deref};
 
 use serde::{Deserialize, Serialize};
 
