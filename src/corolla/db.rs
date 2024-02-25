@@ -1,10 +1,9 @@
 use super::{
-    consts::SPEC_SCHEMA_VERSION,
     error::Error,
     spec::{Query, Spec},
     version::{InstanceVersion, Version},
 };
-use log::{debug, info};
+use log::{debug, error, info};
 use sqlx::{
     sqlite::{SqliteConnectOptions, SqliteJournalMode},
     Pool, Row, Sqlite, SqlitePool,
@@ -59,7 +58,7 @@ impl DB {
             db.write_raw_query(&s, None).await?;
         }
         info!("initializing corolla db tables");
-        let _ = db._init_corolla_tables().await?;
+        let _ = db._init_corolla_tables(&spec).await?;
         Ok(db)
     }
     /// Executes a read-only query on the SQLite database and returns the result.
@@ -256,13 +255,13 @@ impl DB {
         Ok(())
     }
     /// Initialize core Corolla sqlite tables
-    async fn _init_corolla_tables(&self) -> Result<(), Error> {
+    async fn _init_corolla_tables(&self, spec: &Spec) -> Result<(), Error> {
         self.write_raw_query(
             "create table if not exists corolla_db_info (key text, value text);",
             None,
         )
         .await?;
-        let version_str: String = Version::from(SPEC_SCHEMA_VERSION).into();
+        let version_str: String = spec.version.clone().into();
         self.write_raw_query(
             &format!(
                 "insert into corolla_db_info values ('version', '{}');",
@@ -280,10 +279,25 @@ impl DB {
                 "select value from corolla_db_info where key = 'version';",
                 None,
             )
-            .await?;
-        match res.get(0) {
-            Some(val) => Ok(Some(InstanceVersion::from(val))),
-            None => Ok(None),
+            .await;
+        match res {
+            Ok(res) => match res.get(0) {
+                Some(val) => Ok(Some(InstanceVersion::from(val))),
+                None => Ok(None),
+            },
+            Err(err) => match err {
+                Error::SQL(err) => {
+                    if err
+                        .as_database_error()
+                        .is_some_and(|dberr| dberr.message().contains("no such table"))
+                    {
+                        Ok(None)
+                    } else {
+                        Err(Error::SQL(err))
+                    }
+                }
+                _ => Err(err),
+            },
         }
     }
 

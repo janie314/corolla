@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// A general version type.
 /// Uses [this Rust trick](https://stackoverflow.com/a/25415289).
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Version(Vec<u64>);
 
 impl Deref for Version {
@@ -48,7 +48,9 @@ impl Into<String> for Version {
     fn into(self) -> String {
         self.0
             .into_iter()
-            .fold("".to_string(), |a, b| format!("{a}.{b}"))
+            .map(|a| a.to_string())
+            .reduce(|a, b| format!("{a}.{b}"))
+            .unwrap_or_default()
     }
 }
 
