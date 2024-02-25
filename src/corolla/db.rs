@@ -55,7 +55,7 @@ impl DB {
         };
         info!("running init statements from spec");
         for s in &spec.init {
-            db.write_raw_query(&s, None).await?;
+            db._write_raw_query(&s, None).await?;
         }
         info!("initializing corolla DB tables");
         let _ = db._init_corolla_tables(&spec).await?;
@@ -235,7 +235,7 @@ impl DB {
     /// * `sql` - SQL statement to execute
     /// * `conn` - Can pass a `conn.write()` here to execute this method with a shared lock.
     /// TODO: This needs to take a vector of SQL statements
-    async fn write_raw_query(
+    async fn _write_raw_query(
         &self,
         sql: &str,
         conn: Option<RwLockWriteGuard<'_, Pool<Sqlite>>>,
@@ -256,20 +256,12 @@ impl DB {
     }
     /// Initialize core Corolla sqlite tables
     async fn _init_corolla_tables(&self, spec: &Spec) -> Result<(), Error> {
-        self.write_raw_query(
+        self._write_raw_query(
             "create table if not exists corolla_db_info (key text unique not null, value text);",
             None,
         )
         .await?;
-        let version_str: String = spec.version.clone().into();
-        self.write_raw_query(
-            &format!(
-                "insert or replace into corolla_db_info values ('version', '{}');",
-                version_str
-            ),
-            None,
-        )
-        .await?;
+        self._write_instance_version(&spec.version).await?;
         Ok(())
     }
     /// Get current DB instance version
@@ -286,29 +278,45 @@ impl DB {
                 None => Ok(None),
             },
             Err(err) => match err {
-                Error::SQL(err) => {
-                    if err
-                        .as_database_error()
-                        .is_some_and(|dberr| dberr.message().contains("no such table"))
-                    {
-                        Ok(None)
-                    } else {
-                        Err(Error::SQL(err))
+                Error::SQL(err) => match err {
+                    sqlx::Error::Database(err) => {
+                        if err.message().contains("no such table") {
+                            Ok(None)
+                        } else {
+                            Err(Error::SQL(sqlx::Error::Database(err)))
+                        }
                     }
-                }
+                    sqlx::Error::RowNotFound => Ok(None),
+                    _ => Err(Error::SQL(err)),
+                },
                 _ => Err(err),
             },
         }
     }
+    /// Write current DB instance version
+    async fn _write_instance_version(&self, v: &Version) -> Result<(), Error> {
+        self._write_raw_query(
+            &format!(
+                "insert or replace into corolla_db_info values ('version', '{}');",
+                v
+            ),
+            None,
+        )
+        .await
+    }
 
     /// Run conversions specified by a spec.json file
-    async fn _run_conversions(&self, spec: &Spec, v: Version) -> Result<(), Error> {
+    async fn _run_conversions(&self, spec: &Spec, mut v: Version) -> Result<(), Error> {
         info!("running DB conversions");
         for (i, conversion) in spec.conversions.iter().enumerate() {
             if v <= conversion.max_version {
                 info!("running conversion {i}");
                 for query in &conversion.queries {
-                    self.write_raw_query(&query, None).await?;
+                    self._write_raw_query(&query, None).await?;
+                }
+                if v != conversion.new_version {
+                    v = conversion.new_version.clone();
+                    self._write_instance_version(&v).await?;
                 }
             } else {
                 info!("skipping conversion {i}");

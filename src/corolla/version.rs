@@ -1,5 +1,5 @@
 /// This file contains methods for both spec versions and versions used by an instance of a Corolla DB.
-use std::{cmp::Ordering, ops::Deref};
+use std::{cmp::Ordering, ops::Deref, path::Display};
 
 use serde::{Deserialize, Serialize};
 
@@ -68,6 +68,21 @@ impl From<&String> for Version {
 impl<const N: usize> From<[u64; N]> for Version {
     fn from(value: [u64; N]) -> Self {
         Version(value.to_vec())
+    }
+}
+
+impl std::fmt::Display for Version {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut first = true;
+        for i in self.iter() {
+            if first {
+                write!(f, "{i}")?;
+                first = false;
+            } else {
+                write!(f, ".{i}")?;
+            }
+        }
+        Ok(())
     }
 }
 
