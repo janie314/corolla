@@ -1,6 +1,6 @@
 # Corolla
 
-Corolla is a a lightweight SQLite web server. You can use it as bare-bones web
+Corolla is a a lightweight SQLite web server. You can use it as a bare-bones web
 framework.
 
 # Example Application
@@ -22,7 +22,7 @@ cd corolla
 3. Start the Corolla server:
 
 ```bash
-cargo run -- -s example_spec.json
+cargo run -- -s examples/example_spec.json
 ```
 
 Now you can make write queries to the database:
