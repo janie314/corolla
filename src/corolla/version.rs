@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     /// version comparison, equality traits
-    fn cmp_traits_version() {
+    fn version_type_has_cmp_traits() {
         let v = Version::from([1, 2, 3]);
         let w = Version::from([1, 2, 3]);
         assert_eq!(v, w);
