@@ -1,0 +1,122 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Corolla DB spec.json format v1.0.0 (https://github.com/janie314/corolla)",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "init": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "queries": {
+      "type": "object",
+      "properties": {
+        "read": {
+          "type": "object",
+          "properties": {
+            "read01": {
+              "type": "object",
+              "properties": {
+                "sql_template": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {}
+                },
+                "cols": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "sql_template",
+                "args",
+                "cols"
+              ]
+            }
+          },
+          "required": [
+            "read01"
+          ]
+        },
+        "write": {
+          "type": "object",
+          "properties": {
+            "write01": {
+              "type": "object",
+              "properties": {
+                "sql_template": {
+                  "type": "string"
+                },
+                "args": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "sql_template",
+                "args"
+              ]
+            }
+          },
+          "required": [
+            "write01"
+          ]
+        }
+      },
+      "required": [
+        "read",
+        "write"
+      ]
+    },
+    "conversions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "max_version": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "new_version": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "queries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "max_version",
+          "new_version",
+          "queries"
+        ]
+      }
+    }
+  },
+  "required": [
+    "version",
+    "init",
+    "queries",
+    "conversions"
+  ]
+}

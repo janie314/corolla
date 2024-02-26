@@ -1,4 +1,6 @@
 use clap::Parser;
+use log::{error, info, LevelFilter};
+use std::{env, process};
 
 mod corolla;
 
@@ -25,11 +27,25 @@ struct Args {
 
 #[tokio::main]
 async fn main() {
+    // parse CLI args
     let args = Args::parse();
+    // init logging; default logging level is INFO
+    match env::var("RUST_LOG") {
+        Ok(_) => pretty_env_logger::init(),
+        Err(_) => pretty_env_logger::formatted_builder()
+            .filter(None, LevelFilter::Info)
+            .init(),
+    }
+    info!("corolla v{}", env!("CARGO_PKG_VERSION"));
     if args.test {
     } else {
-        corolla::run(&args.route, args.port, &args.db, &args.spec)
-            .await
-            .expect("the server stopped");
+        let res = corolla::run(&args.route, args.port, &args.db, &args.spec).await;
+        match res {
+            Ok(_) => (),
+            Err(e) => {
+                error!("{:?}", e);
+                process::exit(1)
+            }
+        }
     }
 }

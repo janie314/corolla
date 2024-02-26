@@ -1,12 +1,14 @@
 # Corolla
 
-Corolla is a a lightweight SQLite web server. You can use it as bare-bones web
+Corolla is a a lightweight SQLite web server. You can use it as a bare-bones web
 framework.
 
 # Example Application
 
-This Git repostiory includes an example Corolla [spec](TODO:DOCLINK), which is a
-JSON file that defines a Corolla server's available queries.
+This Git repostiory includes example Corolla
+[specs](https://github.com/janie314/corolla/blob/main/examples/), which are JSON
+files that define a Corolla server's available queries, DB schema, and
+conversions.
 
 To run the example Corolla spec:
 
@@ -22,7 +24,7 @@ cd corolla
 3. Start the Corolla server:
 
 ```bash
-cargo run -- -s example_spec.json
+cargo run -- -s examples/example_spec.json
 ```
 
 Now you can make write queries to the database:
@@ -30,7 +32,7 @@ Now you can make write queries to the database:
 4.
 
 ```bash
-curl -s -X POST http://localhost:50000/write/write01 \
+# curl -s -X POST http://localhost:50000/write/write01 \
   -H 'content-type: application/json' \
   -d '{ "a": "sandringham" }'
 ```
@@ -40,7 +42,15 @@ curl -s -X POST http://localhost:50000/write/write01 \
 5.
 
 ```bash
-curl -s http://localhost:50000/read/read01
+# curl -s http://localhost:50000/read/read01 | jq
+[
+  [
+    "c"
+  ],
+  [
+    "sandringham"
+  ]
+]
 ```
 
 # Usage
@@ -57,5 +67,3 @@ Options:
   -h, --help           Print help
   -V, --version        Print version
 ```
-
-For more information
