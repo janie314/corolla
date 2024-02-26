@@ -18,8 +18,6 @@ pub struct DB {
     conn: Arc<RwLock<Pool<Sqlite>>>,
     /// A lookup table of DB queries.
     queries: Queries,
-    /// A lookup table of read queries' columns.
-    cols: HashMap<String, Vec<String>>,
 }
 
 impl DB {
@@ -41,12 +39,7 @@ impl DB {
         debug!("initializing DB object");
         let conn = Arc::new(RwLock::new(conn));
         let queries = spec.queries.clone();
-        let cols = HashMap::<String, Vec<String>>::new();
-        let db = DB {
-            conn,
-            queries,
-            cols,
-        };
+        let db = DB { conn, queries };
         info!("checking if corolla DB has been initialized");
         // if DB is initialized (can find a corolla instance version inside it), then run the conversions
         match db._instance_version().await? {

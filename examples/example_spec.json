@@ -1,4 +1,5 @@
 {
+  "spec_version": [1, 0, 0],
   "version": [1, 0, 1],
   "init": ["create table if not exists t (c text);"],
   "queries": {

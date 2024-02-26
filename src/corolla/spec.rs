@@ -1,4 +1,7 @@
-use super::{error::Error, version::InstanceVersion};
+use super::{
+    error::Error,
+    version::{InstanceVersion, SpecVersion},
+};
 use log::info;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fs, path::Path};
@@ -53,6 +56,7 @@ pub struct Queries {
 /// The spec.json format, in Rust struct form.
 #[derive(Serialize, Deserialize)]
 pub struct Spec {
+    pub spec_version: SpecVersion,
     pub version: InstanceVersion,
     pub init: Vec<String>,
     pub queries: Queries,

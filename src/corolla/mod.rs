@@ -12,7 +12,6 @@ use axum::{
 use log::info;
 use std::collections::HashMap;
 
-mod consts;
 mod db;
 mod error;
 mod spec;

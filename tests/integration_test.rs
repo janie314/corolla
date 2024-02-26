@@ -3,7 +3,6 @@ use pretty_assertions::assert_eq;
 use reqwest::StatusCode;
 use std::{
     collections::HashMap,
-    io::Write,
     path::Path,
     process::{Command, Stdio},
     thread,
