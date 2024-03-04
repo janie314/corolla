@@ -1,6 +1,6 @@
 [package]
 name = "corolla"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "\"your liteweight backend\""
 license = "BSD-3-Clause"
