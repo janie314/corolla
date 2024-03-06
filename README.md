@@ -67,3 +67,12 @@ Options:
   -h, --help           Print help
   -V, --version        Print version
 ```
+
+# How to Take a Dependabot Update
+
+1. Rebase against dependabot branch.
+1. `cargo update`
+1. Run tests.
+1. Accept merge request.
+1. git tag current version, then `git push --tags`.
+1. `cargo publish`
