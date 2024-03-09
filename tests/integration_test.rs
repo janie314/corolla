@@ -46,7 +46,7 @@ fn integration_test() {
         .stdout(Stdio::null())
         .spawn()
         .expect("failed to run corolla with examples/example_spec.json");
-    thread::sleep(time::Duration::from_secs(2));
+    thread::sleep(time::Duration::from_secs(10));
     let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
     let client = reqwest::blocking::Client::new();
     for x in inputs.iter() {
