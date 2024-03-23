@@ -42,7 +42,7 @@ async fn main() {
     info!("corolla v{}", env!("CARGO_PKG_VERSION"));
     if args.test {
     } else {
-        let res = corolla::run(&args.route, args.port, &args.db, &args.spec).await;
+        let res = corolla::run(&args.route, args.port, &args.db, &args.r#static, &args.spec).await;
         match res {
             Ok(_) => (),
             Err(e) => {
