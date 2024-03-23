@@ -20,6 +20,9 @@ struct Args {
     /// Filepath to the spec.json file
     #[arg(short, long, default_value_t = String::from("spec.json"))]
     spec: String,
+    /// Filepath to static file directory
+    #[arg(long, default_value_t = String::from("public"))]
+    r#static: String,
     /// Test mode?
     #[arg(short, long)]
     test: bool,
