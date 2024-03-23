@@ -20,6 +20,9 @@ struct Args {
     /// Filepath to the spec.json file
     #[arg(short, long, default_value_t = String::from("spec.json"))]
     spec: String,
+    /// Filepath to static file directory
+    #[arg(long, default_value_t = String::from("public"))]
+    r#static: String,
     /// Test mode?
     #[arg(short, long)]
     test: bool,
@@ -39,7 +42,7 @@ async fn main() {
     info!("corolla v{}", env!("CARGO_PKG_VERSION"));
     if args.test {
     } else {
-        let res = corolla::run(&args.route, args.port, &args.db, &args.spec).await;
+        let res = corolla::run(&args.route, args.port, &args.db, &args.r#static, &args.spec).await;
         match res {
             Ok(_) => (),
             Err(e) => {
