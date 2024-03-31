@@ -9,6 +9,9 @@ interface Result {
 class API {
   private url_base: string;
 
+  /**
+   * @param url_base The Corolla server's URL base, e.g. "/application". Must be empty (default) or start with "/".
+   */
   public constructor(url_base: string = "") {
     if (
       url_base.length !== 0 && !/^\//.test(url_base) && !/\/$/.test(url_base)
@@ -21,11 +24,21 @@ class API {
     this.url_base = url_base;
   }
 
+  /**
+   * @param query The name of the Corolla read query.
+   * @param args Key-value map of query arguments.
+   * @returns The query's SQL results.
+   */
   public async read_query(
     query: string,
-    args: Args,
+    args?: Args,
   ): Promise<Result[]> {
-    const res: string[][] = await fetch(`${this.url_base}/read/${query}`)
+    const url_query_args = args === undefined
+      ? ""
+      : "?" + new URLSearchParams(args);
+    const res: string[][] = await fetch(
+      `${this.url_base}/read/${query}${url_query_args}`,
+    )
       .then((
         r,
       ) => r.json());
@@ -39,6 +52,11 @@ class API {
       ) as Result;
     });
   }
+
+  /**
+   * @param query The name of the Corolla query query.
+   * @param args Key-value map of query arguments.
+   */
   public async write_query(query: string, args: Args) {
     return await fetch(`${this.url_base}/write/${query}`, {
       method: "POST",
