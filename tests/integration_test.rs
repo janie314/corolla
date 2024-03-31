@@ -10,9 +10,9 @@ use std::{
 
 fn cleanup(path: &str) {
     for file in [
-        "corolla.sqlite3",
-        "corolla.sqlite3-shm",
-        "corolla.sqlite3-wal",
+        "corolla-server-test.sqlite3",
+        "corolla-server-test.sqlite3-shm",
+        "corolla-server-test.sqlite3-wal",
     ]
     .iter()
     {
@@ -40,7 +40,10 @@ fn integration_test() {
             "-s",
             "examples/example_spec.json",
             "-d",
-            Path::new(path).join("corolla.sqlite3").to_str().unwrap(),
+            Path::new(path)
+                .join("corolla-server-test.sqlite3")
+                .to_str()
+                .unwrap(),
         ])
         .stderr(Stdio::null())
         .stdout(Stdio::null())

@@ -1,18 +1,16 @@
 class Corolla {
   private url_base: string;
+  private server: string;
 
   /**
-   * @param url_base The Corolla server's URL base, e.g. "/application". Must be empty (default) or start with "/".
+   * @param url_base The Corolla server's URL base, e.g. "/application". Must start with "/". Empty parameter will default to "/". Trailing slashes will be trimmed.
    */
-  public constructor(url_base: string = "") {
-    if (
-      url_base.length !== 0 && !/^\//.test(url_base) && !/\/$/.test(url_base)
-    ) {
-      url_base = "";
-      console.error(
-        `bad url_base ${url_base} passed to corolla API constructor. defaulting to ''`,
-      );
+  public constructor(server: string = "", url_base: string = "/") {
+    url_base = url_base.replace(/\/+$/, "");
+    if (url_base.length === 0) {
+      url_base = "/";
     }
+    this.server = server;
     this.url_base = url_base;
   }
 
@@ -31,7 +29,7 @@ class Corolla {
         ? ""
         : "?" + new URLSearchParams(args);
       const res: string[][] = await fetch(
-        `${this.url_base}/read/${query}${url_query_args}`,
+        `${this.server}${this.url_base}/read/${query}${url_query_args}`,
       )
         .then((
           r,
@@ -56,7 +54,7 @@ class Corolla {
     query: string,
   ) {
     return async (args: Args) => {
-      return await fetch(`${this.url_base}/write/${query}`, {
+      return await fetch(`${this.server}${this.url_base}/write/${query}`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
