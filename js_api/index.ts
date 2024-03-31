@@ -1,12 +1,4 @@
-interface Args {
-  [key: string]: string;
-}
-
-interface Result {
-  [key: string]: string;
-}
-
-class API {
+class Corolla {
   private url_base: string;
 
   /**
@@ -29,9 +21,11 @@ class API {
    * @param args Key-value map of query arguments.
    * @returns The query's SQL results.
    */
-  public make_read_query<Result>(query: string) {
+  public make_read_query<Args extends { [key: string]: string }, Result>(
+    query: string,
+  ) {
     return async (
-      args?: Args,
+      args: Args,
     ): Promise<Result[]> => {
       const url_query_args = args === undefined
         ? ""
@@ -58,17 +52,19 @@ class API {
    * @param query The name of the Corolla query query.
    * @param args Key-value map of query arguments.
    */
-  public async make_write_query(query: string) {
+  public make_write_query<Args extends { [key: string]: string }>(
+    query: string,
+  ) {
     return async (args: Args) => {
       return await fetch(`${this.url_base}/write/${query}`, {
         method: "POST",
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify(args),
+        body: args === undefined ? "{}" : JSON.stringify(args),
       });
     };
   }
 }
 
-export { API };
+export { Corolla };
