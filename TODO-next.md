@@ -1,0 +1,6 @@
+- Create corolla test DBs in tmp
+- Get bun unit test working
+- document in readme
+- spawn bun test from cargo test
+- publish to npm
+- change readme examples to be a little more friendly
