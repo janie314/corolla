@@ -1,7 +1,6 @@
+use crate::common::cleanup;
 use common::server;
 use std::process::Command;
-
-use crate::common::cleanup;
 
 mod common;
 
