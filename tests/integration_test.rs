@@ -1,7 +1,7 @@
 use common::{cleanup, server};
 use pretty_assertions::assert_eq;
 use reqwest::StatusCode;
-use std::{collections::HashMap, process::Command, thread, time};
+use std::{collections::HashMap};
 
 mod common;
 
