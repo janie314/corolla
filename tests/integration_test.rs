@@ -1,24 +1,21 @@
-use core::time;
+use common::{cleanup, server};
 use pretty_assertions::assert_eq;
 use reqwest::StatusCode;
-use std::{
-    collections::HashMap,
-    process::{Command, Stdio},
-    thread,
-};
+use std::{collections::HashMap, process::Command, thread, time};
+
+mod common;
 
 #[test]
 fn integration_test() {
-    cleanup(None);
-    let corolla = server("examples/example_spec.json");
-    thread::sleep(time::Duration::from_secs(10));
+    cleanup(true, None);
+    let mut corolla = server("examples/example_spec.json");
     let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
     let client = reqwest::blocking::Client::new();
     for x in inputs.iter() {
         let mut body = HashMap::new();
         body.insert("a", x);
         let res = client
-            .post("http://localhost:50000/write/write01")
+            .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
             .expect("could not make HTTP request");
@@ -29,7 +26,7 @@ fn integration_test() {
             res.text()
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/read/read01")
+    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/test/read/read01")
         .expect("could not perform GET curl")
         .json()
         .expect("could not parse JSON into expected structure");
@@ -43,12 +40,8 @@ fn integration_test() {
             assert_eq!(row.get(0).unwrap(), x);
         }
     }
-    Command::new("kill")
-        .arg(corolla.id().to_string())
-        .output()
-        .expect("could not kill corolla; this will require manual cleanup");
-    let corolla = server("examples/example_spec_with_conversions.json");
-    thread::sleep(time::Duration::from_secs(2));
+    cleanup(false, Some(&mut corolla));
+    let mut corolla = server("examples/example_spec_with_conversions.json");
     let inputs = [
         ("cargo test 90210", "what we have here"),
         ("cargo test 90211", "is failure to communicate"),
@@ -59,7 +52,7 @@ fn integration_test() {
         body.insert("a", x);
         body.insert("b", y);
         let res = client
-            .post("http://localhost:50000/write/write01")
+            .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
             .expect("could not make HTTP request");
@@ -70,7 +63,7 @@ fn integration_test() {
             res.text()
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/read/read01")
+    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/test/read/read01")
         .expect("could not perform GET curl")
         .json()
         .expect("could not parse JSON into expected structure");
@@ -88,5 +81,5 @@ fn integration_test() {
         assert_eq!(row.get(0).unwrap(), x);
         assert_eq!(row.get(1).unwrap(), y);
     }
-    cleanup(Some(corolla.id()));
+    cleanup(true, Some(&mut corolla));
 }

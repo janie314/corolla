@@ -1,15 +1,20 @@
-use std::process::{Command, Stdio};
+use common::server;
+use std::process::Command;
+
+use crate::common::cleanup;
+
+mod common;
 
 #[test]
 fn api_test() {
+    let mut corolla = server("examples/example_spec.json");
     let mut bun_test = Command::new("bun")
         .args(["test"])
-        .stderr(Stdio::null())
-        .stdout(Stdio::null())
         .spawn()
         .expect("failed to run `bun test`");
     assert!(bun_test
         .wait()
         .expect("failed to wait for `bun test`")
-        .success())
+        .success());
+    cleanup(true, Some(&mut corolla));
 }

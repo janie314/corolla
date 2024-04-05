@@ -6,7 +6,6 @@ const corolla = new Corolla("http://127.0.0.1:50000", "/test");
 const write01 = corolla.make_write_query<
   { c: string }
 >("write01");
-await write01({ c: new Date().toISOString() });
 
 const read01 = corolla.make_read_query<
   {},

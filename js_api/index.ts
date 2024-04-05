@@ -9,6 +9,8 @@ class Corolla {
     url_base = url_base.replace(/\/+$/, "");
     if (url_base.length === 0) {
       url_base = "/";
+    } else if (url_base.charAt(0) !== "/") {
+      url_base = "/" + url_base;
     }
     this.server = server;
     this.url_base = url_base;
