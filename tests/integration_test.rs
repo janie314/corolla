@@ -1,14 +1,14 @@
 use common::{cleanup, server};
 use pretty_assertions::assert_eq;
 use reqwest::StatusCode;
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 mod common;
 
-#[test]
-fn integration_test() {
-    cleanup(true, None);
-    let mut corolla = server("examples/example_spec.json");
+#[tokio::test]
+async fn integration_test() {
+    cleanup(true, None).await;
+    let mut corolla = server("examples/example_spec.json").await;
     let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
     let client = reqwest::blocking::Client::new();
     for x in inputs.iter() {
@@ -40,8 +40,8 @@ fn integration_test() {
             assert_eq!(row.get(0).unwrap(), x);
         }
     }
-    cleanup(false, Some(&mut corolla));
-    let mut corolla = server("examples/example_spec_with_conversions.json");
+    cleanup(false, Some(&mut corolla)).await;
+    let mut corolla = server("examples/example_spec_with_conversions.json").await;
     let inputs = [
         ("cargo test 90210", "what we have here"),
         ("cargo test 90211", "is failure to communicate"),
@@ -81,5 +81,5 @@ fn integration_test() {
         assert_eq!(row.get(0).unwrap(), x);
         assert_eq!(row.get(1).unwrap(), y);
     }
-    cleanup(true, Some(&mut corolla));
+    cleanup(true, Some(&mut corolla)).await;
 }

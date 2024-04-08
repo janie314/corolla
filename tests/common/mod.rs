@@ -1,9 +1,13 @@
+use log::info;
 use std::{
     ffi::OsStr,
-    net::TcpStream,
     path::{Path, PathBuf},
-    process::{Child, Command, Stdio},
-    thread, time,
+    process::Stdio,
+};
+use tokio::time::{sleep, Duration};
+use tokio::{
+    net::TcpStream,
+    process::{Child, Command},
 };
 
 pub fn get_root_dir() -> PathBuf {
@@ -17,7 +21,7 @@ pub fn get_root_dir() -> PathBuf {
         .to_path_buf()
 }
 
-pub fn cleanup(kill_db: bool, proc: Option<&mut Child>) {
+pub async fn cleanup(kill_db: bool, proc: Option<&mut Child>) {
     if kill_db {
         let path = get_root_dir();
         for file in [
@@ -30,18 +34,19 @@ pub fn cleanup(kill_db: bool, proc: Option<&mut Child>) {
             Command::new("rm")
                 .arg(Path::new(&path).join("tmp").join(file).to_str().unwrap())
                 .output()
+                .await
                 .expect("could not execute cleanup step");
         }
     }
     match proc {
         Some(proc) => {
-            proc.kill().expect("could not kill server process");
+            proc.kill().await.expect("could not kill server process");
         }
         None => (),
     }
 }
 
-pub fn server<S>(spec_path: &S) -> Child
+pub async fn server<S>(spec_path: &S) -> Child
 where
     S: AsRef<OsStr> + ?Sized,
 {
@@ -67,8 +72,9 @@ where
             path.to_string_lossy()
         ));
     // don't return until the server is fully started and ready to use
-    while TcpStream::connect("localhost:50000").is_err() {
-        thread::sleep(time::Duration::from_secs(1));
+    while TcpStream::connect("localhost:50000").await.is_err() {
+        info!("waiting to connect to corolla server");
+        sleep(Duration::from_secs(1)).await;
     }
     proc
 }

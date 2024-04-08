@@ -4,9 +4,9 @@ use std::process::Command;
 
 mod common;
 
-#[test]
-fn api_test() {
-    let mut corolla = server("examples/example_spec.json");
+#[tokio::test]
+async fn api_test() {
+    let mut corolla = server("examples/example_spec.json").await;
     let mut bun_test = Command::new("bun")
         .args(["test"])
         .spawn()
@@ -15,5 +15,5 @@ fn api_test() {
         .wait()
         .expect("failed to wait for `bun test`")
         .success());
-    cleanup(true, Some(&mut corolla));
+    cleanup(true, Some(&mut corolla)).await;
 }
