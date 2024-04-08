@@ -66,9 +66,11 @@ async fn integration_test() {
             res.text().await
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/test/read/read01")
+    let res: Vec<Vec<String>> = reqwest::get("http://localhost:50000/test/read/read01")
+        .await
         .expect("could not perform GET curl")
         .json()
+        .await
         .expect("could not parse JSON into expected structure");
     let mut iter = res.iter();
     assert_eq!(
