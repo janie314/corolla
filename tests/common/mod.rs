@@ -66,6 +66,7 @@ where
         .arg("/test")
         .stderr(Stdio::null())
         .stdout(Stdio::null())
+        .kill_on_drop(true)
         .spawn()
         .expect(&format!(
             "failed to run corolla with {}",
