@@ -21,8 +21,8 @@ pub fn get_root_dir() -> PathBuf {
         .to_path_buf()
 }
 
-pub async fn cleanup(kill_db: bool, proc: Option<&mut Child>) {
-    if kill_db {
+pub async fn cleanup(delete_db: bool, proc: Option<&mut Child>) {
+    if delete_db {
         let path = get_root_dir();
         for file in [
             "corolla-test.sqlite3",

@@ -5,12 +5,12 @@ use std::collections::HashMap;
 
 mod common;
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 async fn integration_test() {
     cleanup(true, None).await;
     let mut corolla = server("examples/example_spec.json").await;
     let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
-    let client = reqwest::blocking::Client::new();
+    let client = reqwest::Client::new();
     for x in inputs.iter() {
         let mut body = HashMap::new();
         body.insert("a", x);
@@ -18,24 +18,26 @@ async fn integration_test() {
             .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
+            .await
             .expect("could not make HTTP request");
         assert_eq!(
             res.status(),
             StatusCode::OK,
             "HTTP request failed with message {:?}",
-            res.text()
+            res.text().await
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/test/read/read01")
+    let res: Vec<Vec<String>> = reqwest::get("http://localhost:50000/test/read/read01")
+        .await
         .expect("could not perform GET curl")
         .json()
+        .await
         .expect("could not parse JSON into expected structure");
     for (i, row) in res.iter().enumerate() {
         assert_eq!(row.len(), 1);
         if i == 0 {
             assert_eq!(row.get(0).unwrap(), "c");
         } else {
-            println!("{i} {}", row.get(0).unwrap_or(&String::from("")));
             let x = inputs.get(i - 1).unwrap();
             assert_eq!(row.get(0).unwrap(), x);
         }
@@ -55,12 +57,13 @@ async fn integration_test() {
             .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
+            .await
             .expect("could not make HTTP request");
         assert_eq!(
             res.status(),
             StatusCode::OK,
             "HTTP request failed with message {:?}",
-            res.text()
+            res.text().await
         );
     }
     let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/test/read/read01")
