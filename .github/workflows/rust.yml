@@ -11,11 +11,16 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v4
-    - uses: oven-sh/setup-bun@v1
     - name: Build
       run: cargo build --verbose
-    - name: Run tests
-      run: BUN_RUNTIME=/home/janie/.bun/bin/bun cargo test --verbose
+    - name: Run cargo test
+      run: cargo test --verbose
+    - name: Run background corolla server
+      run: cargo run -- -s examples/example_spec.json -d tmp/$(date +%s).sqlite3 -r /test &
+    - name: sleep 3 seconds
+      run: sleep 3
+    - name: Run bun test
+      run: bun test
