@@ -7,13 +7,10 @@ mod common;
 #[tokio::test]
 async fn api_test() {
     let mut corolla = server("examples/example_spec.json").await;
-    let mut bun_test = Command::new("bun")
+    let bun_test = Command::new("bun")
         .args(["test"])
-        .spawn()
+        .status()
         .expect("failed to run `bun test`");
-    assert!(bun_test
-        .wait()
-        .expect("failed to wait for `bun test`")
-        .success());
+    assert!(bun_test.success());
     cleanup(true, Some(&mut corolla)).await;
 }
