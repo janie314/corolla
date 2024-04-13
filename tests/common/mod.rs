@@ -24,19 +24,18 @@ pub fn get_root_dir() -> PathBuf {
 pub async fn cleanup(delete_db: bool, proc: Option<&mut Child>) {
     if delete_db {
         let path = get_root_dir();
-        for file in [
-            "corolla-test.sqlite3",
-            "corolla-test.sqlite3-shm",
-            "corolla-test.sqlite3-wal",
-        ]
-        .iter()
-        {
-            Command::new("rm")
-                .arg(Path::new(&path).join("tmp").join(file).to_str().unwrap())
-                .output()
-                .await
-                .expect("could not execute cleanup step");
-        }
+        Command::new("rm")
+            .arg("-rf")
+            .arg(Path::new(&path).join("tmp").to_str().unwrap())
+            .output()
+            .await
+            .expect("could not execute rm");
+        Command::new("mkdir")
+            .arg("-p")
+            .arg(Path::new(&path).join("tmp").to_str().unwrap())
+            .output()
+            .await
+            .expect("could not execute mkdir");
     }
     match proc {
         Some(proc) => {

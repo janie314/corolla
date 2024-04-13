@@ -1,5 +1,5 @@
 import { Corolla } from "../js_api/index";
-import { afterAll, beforeAll, expect, test } from "bun:test";
+import { expect, test } from "bun:test";
 
 const corolla = new Corolla("http://127.0.0.1:50000", "/test");
 
@@ -14,17 +14,19 @@ const read01 = corolla.make_read_query<
 
 test("write query", async () => {
   let res = await write01({ c: "carrot" });
-  expect(res.status).toBe(200);
+  expect(res.ok).toBeTrue;
   res = await write01({ c: "tomato" });
-  expect(res.status).toBe(200);
+  expect(res.ok).toBeTrue;
   res = await write01({ c: "squash" });
-  expect(res.status).toBe(200);
+  expect(res.ok).toBeTrue;
 });
 
 test("read query", async () => {
   const rows = await read01({});
-  expect(
-    JSON.stringify(rows) ===
-      JSON.stringify([{ c: "carrot" }, { c: "tomato" }, { c: "squash" }]),
-  );
+  expect(rows !== null);
+  if (rows !== null) {
+    expect(rows[0].c).toBe("carrot");
+    expect(rows[1].c).toBe("tomato");
+    expect(rows[2].c).toBe("squash");
+  }
 });

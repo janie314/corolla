@@ -26,16 +26,17 @@ class Corolla {
   ) {
     return async (
       args: Args,
-    ): Promise<Result[]> => {
+    ): Promise<Result[] | null> => {
       const url_query_args = args === undefined
         ? ""
         : "?" + new URLSearchParams(args);
-      const res: string[][] = await fetch(
+      const http_res = await fetch(
         `${this.server}${this.url_base}/read/${query}${url_query_args}`,
-      )
-        .then((
-          r,
-        ) => r.json());
+      );
+      if (!http_res.ok) {
+        return null;
+      }
+      const res: string[][] = await http_res.json();
       if (res.length === 0) {
         return [];
       }
