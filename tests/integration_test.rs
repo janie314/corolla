@@ -13,7 +13,7 @@ async fn integration_test() {
     let client = reqwest::Client::new();
     for x in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("a", x);
+        body.insert("c", x);
         let res = client
             .post("http://localhost:50000/test/write/write01")
             .json(&body)
@@ -51,8 +51,8 @@ async fn integration_test() {
     ];
     for (x, y) in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("a", x);
-        body.insert("b", y);
+        body.insert("c", x);
+        body.insert("newcol", y);
         let res = client
             .post("http://localhost:50000/test/write/write01")
             .json(&body)

@@ -13,7 +13,7 @@
     "write": {
       "write01": {
         "sql_template": "insert into t values (?,?);",
-        "args": ["a", "b"]
+        "args": ["c", "newcol"]
       }
     }
   },

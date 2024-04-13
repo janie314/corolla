@@ -26,13 +26,13 @@ pub async fn cleanup(delete_db: bool, proc: Option<&mut Child>) {
         let path = get_root_dir();
         Command::new("rm")
             .arg("-rf")
-            .arg(Path::new(&path).join("tmp").to_str().unwrap())
+            .arg(Path::new(&path).join("tmp"))
             .output()
             .await
             .expect("could not execute rm");
         Command::new("mkdir")
             .arg("-p")
-            .arg(Path::new(&path).join("tmp").to_str().unwrap())
+            .arg(Path::new(&path).join("tmp"))
             .output()
             .await
             .expect("could not execute mkdir");

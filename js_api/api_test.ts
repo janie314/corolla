@@ -1,5 +1,14 @@
 import { Corolla } from "../js_api/index";
-import { expect, test } from "bun:test";
+import { $ } from "bun";
+import { afterAll, beforeAll, expect, test } from "bun:test";
+
+async function cleanup() {
+  await $`rm -rf ${import.meta.dir}/../tmp`;
+  await $`mkdir -p ${import.meta.dir}/../tmp`;
+}
+
+beforeAll(cleanup);
+afterAll(cleanup);
 
 const corolla = new Corolla("http://127.0.0.1:50000", "/test");
 
