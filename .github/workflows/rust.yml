@@ -17,7 +17,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Run cargo test
-      run: cargo test --verbose
+      run: timeout 300 cargo test --verbose
     - name: Run background corolla server
       run: |
        cargo run -- -s examples/example_spec.json -d tmp/$(date +%s).sqlite3 -r /test &
