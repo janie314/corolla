@@ -19,8 +19,7 @@ jobs:
     - name: Run cargo test
       run: cargo test --verbose
     - name: Run background corolla server
-      run: cargo run -- -s examples/example_spec.json -d tmp/$(date +%s).sqlite3 -r /test &
-    - name: sleep 3 seconds
-      run: sleep 3
-    - name: Run bun test
-      run: bun test
+      run: |
+       cargo run -- -s examples/example_spec.json -d tmp/$(date +%s).sqlite3 -r /test &
+       sleep 5
+       bun test
