@@ -1,6 +1,6 @@
 use clap::Parser;
 use log::{error, info, LevelFilter};
-use std::{env, process};
+use std::{env, fs::File, io::Write, process};
 
 mod corolla;
 
@@ -11,6 +11,9 @@ struct Args {
     /// Filepath to the SQLite database
     #[arg(short, long, default_value_t = String::from("corolla.sqlite3"))]
     db: String,
+    /// Write out the server process's PID to this file
+    #[arg(long)]
+    pid_file: Option<String>,
     /// Choose a port to listen on
     #[arg(short, long, default_value_t = 50000)]
     port: i64,
@@ -42,6 +45,14 @@ async fn main() {
     info!("corolla v{}", env!("CARGO_PKG_VERSION"));
     if args.test {
     } else {
+        match args.pid_file {
+            Some(path) => {
+                let mut file = File::create(&path).expect(&format!("could not open {}", path));
+                file.write_all(process::id().to_string().as_bytes())
+                    .expect(&format!("could not write PID to {}", path));
+            }
+            None => (),
+        };
         let res = corolla::run(&args.route, args.port, &args.db, &args.r#static, &args.spec).await;
         match res {
             Ok(_) => (),

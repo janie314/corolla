@@ -1,14 +1,36 @@
 import { Corolla } from "../js_api/index";
-import { $ } from "bun";
+import { $, ShellPromise, type Subprocess } from "bun";
 import { afterAll, beforeAll, expect, test } from "bun:test";
 
-async function cleanup() {
+let test_server: Subprocess | undefined;
+let pid: string | undefined;
+const uuid = crypto.randomUUID();
+
+beforeAll(async () => {
   await $`rm -rf ${import.meta.dir}/../tmp`;
   await $`mkdir -p ${import.meta.dir}/../tmp`;
-}
+  test_server = Bun.spawn([
+    "cargo",
+    "run",
+    "--",
+    "-s",
+    "examples/example_spec.json",
+    "-d",
+    `tmp/${uuid}.sqlite3`,
+    "-r",
+    "/test",
+    "--pid-file",
+    `/tmp/${uuid}`,
+  ]);
+  await Bun.sleep(10000);
+});
 
-beforeAll(cleanup);
-afterAll(cleanup);
+afterAll(async () => {
+  const pid = await Bun.file(`/tmp/${uuid}`).text();
+  await $`kill ${pid}`;
+  await $`rm -rf ${import.meta.dir}/../tmp /tmp/${uuid}`;
+  await $`mkdir -p ${import.meta.dir}/../tmp`;
+});
 
 const corolla = new Corolla("http://127.0.0.1:50000", "/test");
 
