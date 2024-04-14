@@ -70,7 +70,7 @@ Options:
 
 # JavaScript API
 
-Available via npm at `corolla-api`.
+Available via npm at `corolla_api`.
 
 See the
 [js_api folder and README](https://github.com/janie314/corolla/tree/main/examples)
