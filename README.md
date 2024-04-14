@@ -3,7 +3,7 @@
 Corolla is a a lightweight SQLite web server. You can use it as a bare-bones web
 framework.
 
-# Example Application
+# Example
 
 This Git repostiory includes example Corolla
 [specs](https://github.com/janie314/corolla/blob/main/examples/), which are JSON
@@ -34,7 +34,7 @@ Now you can make write queries to the database:
 ```bash
 # curl -s -X POST http://localhost:50000/write/write01 \
   -H 'content-type: application/json' \
-  -d '{ "a": "sandringham" }'
+  -d '{ "vacation_spot": "sandringham" }'
 ```
 
 ... And read queries!
@@ -45,7 +45,7 @@ Now you can make write queries to the database:
 # curl -s http://localhost:50000/read/read01 | jq
 [
   [
-    "c"
+    "vacation_spot"
   ],
   [
     "sandringham"
@@ -68,7 +68,35 @@ Options:
   -V, --version        Print version
 ```
 
-# How to Take a Dependabot Update
+# JavaScript API
+
+Available via npm at `corolla_api`.
+
+See the
+[js_api folder and README](https://github.com/janie314/corolla/tree/main/examples)
+for more information.
+
+# Development
+
+Issues and pull requests welcome!
+
+## Testing
+
+Uses Rust's testing framework and [Bun's](https://bun.sh/) test command.
+
+To test the Corolla server:
+
+```bash
+cargo test
+```
+
+To test the JS/TS API:
+
+```bash
+bun test
+```
+
+## How to Take a Dependabot Update
 
 1. Rebase against dependabot branch.
 1. `cargo update`

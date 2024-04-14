@@ -1,123 +1,81 @@
-use core::time;
+use common::{cleanup, server};
 use pretty_assertions::assert_eq;
 use reqwest::StatusCode;
-use std::{
-    collections::HashMap,
-    path::Path,
-    process::{Command, Stdio},
-    thread,
-};
+use std::collections::HashMap;
 
-fn cleanup(path: &str) {
-    for file in [
-        "corolla.sqlite3",
-        "corolla.sqlite3-shm",
-        "corolla.sqlite3-wal",
-    ]
-    .iter()
-    {
-        Command::new("rm")
-            .arg(Path::new(path).join(file).to_str().unwrap())
-            .output()
-            .expect("could not execute cleanup step");
-    }
-}
+mod common;
 
-#[test]
-fn integration_test() {
-    let path = Path::new(env!("CARGO_BIN_EXE_corolla"))
-        .parent()
-        .expect("couldn't take parent")
-        .parent()
-        .expect("couldn't take parent")
-        .parent()
-        .expect("couldn't take parent")
-        .to_str()
-        .unwrap();
-    cleanup(path);
-    let corolla = Command::new(env!("CARGO_BIN_EXE_corolla"))
-        .args([
-            "-s",
-            "examples/example_spec.json",
-            "-d",
-            Path::new(path).join("corolla.sqlite3").to_str().unwrap(),
-        ])
-        .stderr(Stdio::null())
-        .stdout(Stdio::null())
-        .spawn()
-        .expect("failed to run corolla with examples/example_spec.json");
-    thread::sleep(time::Duration::from_secs(10));
-    let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
-    let client = reqwest::blocking::Client::new();
+#[tokio::test(flavor = "multi_thread")]
+async fn integration_test() {
+    cleanup(true, None).await;
+    let mut corolla = server("examples/example_spec.json").await;
+    let inputs = ["sandringham", "beijing", "lombardy"];
+    let client = reqwest::Client::new();
     for x in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("a", x);
+        body.insert("vacation_spot", x);
         let res = client
-            .post("http://localhost:50000/write/write01")
+            .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
+            .await
             .expect("could not make HTTP request");
         assert_eq!(
             res.status(),
             StatusCode::OK,
             "HTTP request failed with message {:?}",
-            res.text()
+            res.text().await
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/read/read01")
+    let res: Vec<Vec<String>> = reqwest::get("http://localhost:50000/test/read/read01")
+        .await
         .expect("could not perform GET curl")
         .json()
+        .await
         .expect("could not parse JSON into expected structure");
     for (i, row) in res.iter().enumerate() {
         assert_eq!(row.len(), 1);
         if i == 0 {
-            assert_eq!(row.get(0).unwrap(), "c");
+            assert_eq!(row.get(0).unwrap(), "vacation_spot");
         } else {
-            println!("{i} {}", row.get(0).unwrap_or(&String::from("")));
             let x = inputs.get(i - 1).unwrap();
             assert_eq!(row.get(0).unwrap(), x);
         }
     }
-    Command::new("kill")
-        .arg(corolla.id().to_string())
-        .output()
-        .expect("could not kill corolla; this will require manual cleanup");
-    let corolla = Command::new(env!("CARGO_BIN_EXE_corolla"))
-        .args(["-s", "examples/example_spec_with_conversions.json"])
-        .stderr(Stdio::null())
-        .stdout(Stdio::null())
-        .spawn()
-        .expect("failed to run corolla with examples/example_spec.json");
-    thread::sleep(time::Duration::from_secs(2));
+    cleanup(false, Some(&mut corolla)).await;
+    let mut corolla = server("examples/example_spec_with_conversions.json").await;
     let inputs = [
-        ("cargo test 90210", "what we have here"),
-        ("cargo test 90211", "is failure to communicate"),
-        ("cargo test 90212", "some men you just can't reach"),
+        ("avon", "lovely"),
+        ("seaside heights", "a fun town"),
+        ("houston", "hot"),
     ];
     for (x, y) in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("a", x);
-        body.insert("b", y);
+        body.insert("vacation_spot", x);
+        body.insert("notes", y);
         let res = client
-            .post("http://localhost:50000/write/write01")
+            .post("http://localhost:50000/test/write/write01")
             .json(&body)
             .send()
+            .await
             .expect("could not make HTTP request");
         assert_eq!(
             res.status(),
             StatusCode::OK,
             "HTTP request failed with message {:?}",
-            res.text()
+            res.text().await
         );
     }
-    let res: Vec<Vec<String>> = reqwest::blocking::get("http://localhost:50000/read/read01")
+    let res: Vec<Vec<String>> = reqwest::get("http://localhost:50000/test/read/read01")
+        .await
         .expect("could not perform GET curl")
         .json()
+        .await
         .expect("could not parse JSON into expected structure");
     let mut iter = res.iter();
     assert_eq!(
         iter.next().unwrap(),
-        &vec!["c".to_string(), "newcol".to_string()]
+        &vec!["vacation_spot".to_string(), "notes".to_string()]
     );
     iter.next();
     iter.next();
@@ -128,9 +86,5 @@ fn integration_test() {
         assert_eq!(row.get(0).unwrap(), x);
         assert_eq!(row.get(1).unwrap(), y);
     }
-    Command::new("kill")
-        .arg(corolla.id().to_string())
-        .output()
-        .expect("could not kill corolla; this will require manual cleanup");
-    cleanup(path);
+    cleanup(true, Some(&mut corolla)).await;
 }
