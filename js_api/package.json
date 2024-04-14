@@ -1,5 +1,5 @@
 {
-  "name": "js_api",
+  "name": "corolla_api",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
@@ -8,5 +8,6 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "version": "0.3.1"
 }
