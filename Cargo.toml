@@ -1,6 +1,6 @@
 [package]
 name = "corolla"
-version = "0.3.1"
+version = "0.3.2"
 edition = "2021"
 description = "\"your liteweight backend\""
 license = "BSD-3-Clause"
@@ -20,4 +20,4 @@ tower-http = { version = "0.5.2", features = ["fs"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.0"
-reqwest = { version = "0.12.3", features = ["blocking", "json"] }
+reqwest = { version = "0.12.3", features = ["json"] }
