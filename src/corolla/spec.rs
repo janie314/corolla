@@ -90,19 +90,19 @@ mod tests {
         assert_eq!(spec.version, Version::from([1, 0, 1]));
         assert_eq!(
             spec.init.get(0).unwrap(),
-            "create table if not exists t (c text);"
+            "create table if not exists t (vacation_spot text);"
         );
         let read_query = spec.queries.read.get("read01").unwrap();
-        assert_eq!(read_query.sql_template, "select c from t;");
+        assert_eq!(read_query.sql_template, "select vacation_spot from t;");
         assert_eq!(read_query.args.len(), 0);
-        assert_eq!(read_query.cols.get(0).unwrap(), "c");
+        assert_eq!(read_query.cols.get(0).unwrap(), "vacation_spot");
         let proj_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
         let spec_path = Path::new(&proj_dir).join("examples/example_spec_with_conversions.json");
         let spec = read_spec(spec_path).unwrap();
         assert_eq!(spec.version, Version::from([1, 0, 2]));
         assert_eq!(
             spec.init.get(0).unwrap(),
-            "create table if not exists t (c text, newcol text);"
+            "create table if not exists t (vacation_spot text, notes text);"
         );
         let write_query = spec.queries.write.get("write01").unwrap();
         assert_eq!(write_query.sql_template, "insert into t values (?,?);");

@@ -1,19 +1,19 @@
 {
   "spec_version": [1, 0, 0],
   "version": [1, 0, 1],
-  "init": ["create table if not exists t (c text);"],
+  "init": ["create table if not exists t (vacation_spot text);"],
   "queries": {
     "read": {
       "read01": {
-        "sql_template": "select c from t;",
+        "sql_template": "select vacation_spot from t;",
         "args": [],
-        "cols": ["c"]
+        "cols": ["vacation_spot"]
       }
     },
     "write": {
       "write01": {
         "sql_template": "insert into t values (?);",
-        "args": ["c"]
+        "args": ["vacation_spot"]
       }
     }
   },

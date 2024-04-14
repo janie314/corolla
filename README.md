@@ -34,7 +34,7 @@ Now you can make write queries to the database:
 ```bash
 # curl -s -X POST http://localhost:50000/write/write01 \
   -H 'content-type: application/json' \
-  -d '{ "a": "sandringham" }'
+  -d '{ "vacation_spot": "sandringham" }'
 ```
 
 ... And read queries!
@@ -45,7 +45,7 @@ Now you can make write queries to the database:
 # curl -s http://localhost:50000/read/read01 | jq
 [
   [
-    "c"
+    "vacation_spot"
   ],
   [
     "sandringham"
@@ -84,10 +84,16 @@ Issues and pull requests welcome!
 
 Uses Rust's testing framework and [Bun's](https://bun.sh/) test command.
 
-All tests are initiated by:
+To test the Corolla server:
 
 ```bash
 cargo test
+```
+
+To test the JS/TS API:
+
+```bash
+bun test
 ```
 
 ## How to Take a Dependabot Update

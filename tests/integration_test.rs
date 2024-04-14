@@ -9,11 +9,11 @@ mod common;
 async fn integration_test() {
     cleanup(true, None).await;
     let mut corolla = server("examples/example_spec.json").await;
-    let inputs = ["1-2-3", "do-re-mi", "baby you and me"];
+    let inputs = ["sandringham", "beijing", "lombardy"];
     let client = reqwest::Client::new();
     for x in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("c", x);
+        body.insert("vacation_spot", x);
         let res = client
             .post("http://localhost:50000/test/write/write01")
             .json(&body)
@@ -36,7 +36,7 @@ async fn integration_test() {
     for (i, row) in res.iter().enumerate() {
         assert_eq!(row.len(), 1);
         if i == 0 {
-            assert_eq!(row.get(0).unwrap(), "c");
+            assert_eq!(row.get(0).unwrap(), "vacation_spot");
         } else {
             let x = inputs.get(i - 1).unwrap();
             assert_eq!(row.get(0).unwrap(), x);
@@ -45,14 +45,14 @@ async fn integration_test() {
     cleanup(false, Some(&mut corolla)).await;
     let mut corolla = server("examples/example_spec_with_conversions.json").await;
     let inputs = [
-        ("cargo test 90210", "what we have here"),
-        ("cargo test 90211", "is failure to communicate"),
-        ("cargo test 90212", "some men you just can't reach"),
+        ("avon", "lovely"),
+        ("seaside heights", "a fun town"),
+        ("houston", "hot"),
     ];
     for (x, y) in inputs.iter() {
         let mut body = HashMap::new();
-        body.insert("c", x);
-        body.insert("newcol", y);
+        body.insert("vacation_spot", x);
+        body.insert("notes", y);
         let res = client
             .post("http://localhost:50000/test/write/write01")
             .json(&body)
@@ -75,7 +75,7 @@ async fn integration_test() {
     let mut iter = res.iter();
     assert_eq!(
         iter.next().unwrap(),
-        &vec!["c".to_string(), "newcol".to_string()]
+        &vec!["vacation_spot".to_string(), "notes".to_string()]
     );
     iter.next();
     iter.next();

@@ -1,19 +1,19 @@
 {
   "spec_version": [1, 0, 0],
   "version": [1, 0, 2],
-  "init": ["create table if not exists t (c text, newcol text);"],
+  "init": ["create table if not exists t (vacation_spot text, notes text);"],
   "queries": {
     "read": {
       "read01": {
-        "sql_template": "select c, newcol from t;",
+        "sql_template": "select vacation_spot, notes from t;",
         "args": [],
-        "cols": ["c", "newcol"]
+        "cols": ["vacation_spot", "notes"]
       }
     },
     "write": {
       "write01": {
         "sql_template": "insert into t values (?,?);",
-        "args": ["c", "newcol"]
+        "args": ["vacation_spot", "notes"]
       }
     }
   },
@@ -22,7 +22,7 @@
       "max_version": [1, 0, 1],
       "new_version": [1, 0, 2],
       "queries": [
-        "alter table t add column newcol text;"
+        "alter table t add column notes text;"
       ]
     }
   ]
