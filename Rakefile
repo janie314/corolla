@@ -1,3 +1,3 @@
 # frozen_string_literal: true
 
-require 'peppermint/rake/rust'
+require 'peppermint/rake/shared'

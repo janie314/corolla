@@ -17,7 +17,7 @@ GEM
       kramdown (~> 2.0)
     language_server-protocol (3.17.0.3)
     lint_roller (1.1.0)
-    method_source (1.0.0)
+    method_source (1.1.0)
     nokogiri (1.16.4-aarch64-linux)
       racc (~> 1.4)
     nokogiri (1.16.4-arm-linux)
@@ -31,21 +31,21 @@ GEM
     nokogiri (1.16.4-x86_64-linux)
       racc (~> 1.4)
     parallel (1.24.0)
-    parser (3.3.0.5)
+    parser (3.3.1.0)
       ast (~> 2.4.1)
       racc
-    peppermint (0.1.6)
-      pry-byebug
-      rake (~> 13.0)
-      rdoc
-      rspec
-      rubocop
-      rubocop-rake
-      rubocop-rspec
-      solargraph
+    peppermint (0.1.7)
+      pry-byebug (~> 3.10)
+      rake (~> 13.1)
+      rdoc (~> 6.6)
+      rspec (~> 3.12)
+      rubocop (~> 1.57)
+      rubocop-rake (~> 0.6)
+      rubocop-rspec (~> 2.25)
+      solargraph (~> 0.50)
       standard (~> 1.3)
-      toml-rb
-      yard
+      toml-rb (~> 2.2)
+      yard (~> 0.9)
     pry (0.14.2)
       coderay (~> 1.1)
       method_source (~> 1.0)
@@ -138,9 +138,8 @@ GEM
     stringio (3.1.0)
     thor (1.3.1)
     tilt (2.3.0)
-    toml-rb (3.0.1)
+    toml-rb (2.2.0)
       citrus (~> 3.0, > 3.0)
-      racc (~> 1.7)
     unicode-display_width (2.5.0)
     yard (0.9.36)
 
@@ -153,7 +152,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  peppermint (~> 0.1.6)
+  peppermint (~> 0.1.7)
 
 BUNDLED WITH
    2.5.9
