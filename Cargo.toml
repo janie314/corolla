@@ -4,6 +4,7 @@ version = "0.3.2"
 edition = "2021"
 description = "\"your liteweight backend\""
 license = "BSD-3-Clause"
+repository = "https://github.com/janie314/corolla"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
