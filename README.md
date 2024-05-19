@@ -53,6 +53,8 @@ Now you can make write queries to the database:
 ]
 ```
 
+[See here](https://github.com/janie314/notes) for a more realistic example app.
+
 # Usage
 
 ```
